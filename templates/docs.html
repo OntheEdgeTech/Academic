@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ course | default('Docs') | capitalize }} – Documentation</title>
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" type="image/x-icon" href="/media/ontheedge.png">
+
+    <!-- Core stylesheet (served from Flask static/) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='docs.css') }}">
+</head>
+
+<body data-course="{{ course }}" data-active-file="{{ active_file }}">
+    <div class="shell">
+        <!-- Top Bar -->
+        <header class="topbar" role="banner">
+            <div class="topbar-inner">
+                <button id="sidebarToggle" class="toggle" aria-controls="sidebar" aria-expanded="false"
+                    title="Toggle sidebar (Ctrl+B)">
+                    <!-- Hamburger icon -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+
+                <a href="/docs/{{ course }}/" class="brand" aria-label="{{ course }} home">
+                    <img src="/media/ontheedge.png" alt="ontheedge" width="24px">
+                    <span class="name">Tech Handbook</span>
+                </a>
+
+                <div class="search">
+                    <input id="searchInput" type="search" placeholder="Search docs… (Ctrl+/)" autocomplete="off" />
+                </div>
+            </div>
+        </header>
+
+        <!-- Workspace -->
+        <div class="workspace">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="sidebar" role="navigation" aria-label="Docs Navigation">
+                <div class="section">
+                    <div class="label">Contents</div>
+                    <ul id="docList" class="doc-list">
+                        {% for f in files %}
+                        {% set human = f.rsplit('.', 1)[0] %}
+                        <li>
+                            <a class="doc-link{% if f == active_file %} active{% endif %}"
+                                href="{{ url_for('serve_doc', course=course, filename=f) }}">
+                                <span class="dot" aria-hidden="true"></span>
+                                <span class="t">{{ human }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="content" role="main">
+                <div class="content-inner">
+                    <article class="doc-content">{{ content | safe }}</article>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" role="contentinfo">
+            <div class="footer-inner">
+                <div class="brand-mini">
+                    <img src="/media/ontheedge.png" alt="ontheedge" width="24px">
+                    <span>OnTheEdge Tech</span>
+                </div>
+                <div class="nav-cta">
+                    {% set idx = files.index(active_file) if active_file in files else -1 %}
+                    {% set prev_file = files[idx-1] if idx > 0 else None %}
+                    {% set next_file = files[idx+1] if idx != -1 and idx < files|length - 1 else None %} {% if prev_file
+                        %} <a class="btn btn-ghost" href="{{ url_for('serve_doc', course=course, filename=prev_file) }}"
+                        rel="prev">
+                        <span aria-hidden="true">←</span>
+                        <span>Prev</span>
+                        <span class="k">{{ prev_file.rsplit('.',1)[0] }}</span>
+                        </a>
+                        {% endif %}
+
+                        {% if next_file %}
+                        <a class="btn btn-cta" href="{{ url_for('serve_doc', course=course, filename=next_file) }}"
+                            rel="next">
+                            <span>Next</span>
+                            <span class="k">{{ next_file.rsplit('.',1)[0] }}</span>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                        {% endif %}
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- Core JS (served from Flask static/) -->
+    <script src="{{ url_for('static', filename='docs.js') }}" defer></script>
+</body>
+
+</html>
