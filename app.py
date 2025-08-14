@@ -1,17 +1,18 @@
-from flask import Flask, render_template, send_file, abort
+from flask import Flask, render_template, send_file, abort, jsonify
 import os
 import markdown
 from flask_caching import Cache
 
 app = Flask(__name__)
 app.config['CACHE_TYPE'] = 'simple'  # 'redis' for production
-app.config['CACHE_DEFAULT_TIMEOUT'] = 1  # 5 minutes
+app.config['CACHE_DEFAULT_TIMEOUT'] = 1  # seconds
 cache = Cache(app)
 
 # Configuration
 DOCS_DIR = os.path.join(os.path.dirname(__file__), 'docs')
 DEFAULT_DOC = '1. welcome.md'
-
+COURSE_DOCS_DIR = "docs"
+MEDIA_DIR = "media"
 
 def get_markdown_file_list(course_dir):
     """Return a sorted list of markdown files (without extensions) in the course directory."""
@@ -36,6 +37,10 @@ def render_markdown_file(course_dir, filename):
         extensions=['fenced_code', 'tables', 'toc', 'codehilite']
     )
 
+
+@app.route("/")
+def index():
+    return render_template("landing.html")
 
 @app.route("/docs/<course>/")
 @app.route("/docs/<course>/<path:filename>")
@@ -63,6 +68,23 @@ def serve_doc(course, filename=None):
         active_file=filename
     )
 
+@app.route("/api/courses")
+def get_courses():
+    courses = []
+    for course_name in os.listdir(COURSE_DOCS_DIR):
+        course_path = os.path.join(COURSE_DOCS_DIR, course_name)
+        if os.path.isdir(course_path):
+            desc_file = os.path.join(course_path, "desc.txt")
+            desc = ""
+            if os.path.exists(desc_file):
+                with open(desc_file, "r") as f:
+                    desc = f.read().strip()
+                courses.append({
+                    "name": course_name,
+                    "description": desc,
+                    "image": f"/media/{course_name}.png"
+                })
+    return jsonify(courses)
 
 # Serve media files
 @app.route("/media/<path:filename>")

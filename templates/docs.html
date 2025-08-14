@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ course | default('Docs') | capitalize }} – Documentation</title>
     <meta name="color-scheme" content="dark" />
-    <link rel="icon" type="image/x-icon" href="/media/ontheedge.png">
+    <link rel="icon" type="image/x-icon" href="/media/logo.png">
 
     <!-- Core stylesheet (served from Flask static/) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='docs.css') }}">
@@ -27,8 +27,8 @@
                     </svg>
                 </button>
 
-                <a href="/docs/{{ course }}/" class="brand" aria-label="{{ course }} home">
-                    <img src="/media/ontheedge.png" alt="ontheedge" width="24px">
+                <a href="/" class="brand" aria-label="Landing Page">
+                    <img src="/media/logo.png" alt="ontheedge" width="36px">
                     <span class="name">Tech Handbook</span>
                 </a>
 
@@ -71,8 +71,8 @@
         <footer class="footer" role="contentinfo">
             <div class="footer-inner">
                 <div class="brand-mini">
-                    <img src="/media/ontheedge.png" alt="ontheedge" width="24px">
-                    <span>OnTheEdge Tech</span>
+                    <img src="/media/logo.png" alt="ontheedge" width="24px">
+                    <span><a href="https://github.com/OntheEdgeTech" style="color: yellow;">OnTheEdge Tech</a></span>
                 </div>
                 <div class="nav-cta">
                     {% set idx = files.index(active_file) if active_file in files else -1 %}
