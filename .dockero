@@ -1,0 +1,8 @@
+[default]
+name = handbook
+image = alpine:latest
+command = cd workspace && sh start.sh
+
+[volumes]
+env = /opt/handbook:/workspace
+port = 8080:80
