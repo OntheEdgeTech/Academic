@@ -1,49 +1,61 @@
 # Combined Documentation App
 
-This application combines the best features of two documentation systems:
-1. TechHandBook - Clean, modern documentation interface with excellent navigation
-2. Welding Study App - Dynamic content management with admin panel
+A modern, feature-rich documentation platform that combines the best features of TechHandBook and Welding Study App. Built with Flask, this application provides a clean interface for organizing and presenting technical documentation with powerful admin capabilities.
+
+![alt text](media/ss1.png)
+![alt text](media/ss2.png)
 
 ## Features
 
-- **Modern UI**: Clean, dark-themed interface inspired by TechHandBook
-- **File-based Documentation**: Organize content in courses with Markdown files
-- **Admin Panel**: Full CRUD operations for managing courses and documents
-- **Global Search**: Search across all courses and documents
-- **Responsive Design**: Works on desktop and mobile devices
-- **Markdown Support**: Full Markdown support with syntax highlighting
-- **Navigation**: Previous/Next buttons, breadcrumbs, and table of contents
-- **Course System**: Organize documentation into courses
-- **Print Styles**: Optimized printing of documentation
+- **Modern UI**: Clean, dark-themed interface with responsive design
+- **Course-based Organization**: Structure documentation into logical courses
+- **Markdown Support**: Full Markdown formatting with syntax highlighting
+- **Powerful Search**: Global search across all courses and documents
+- **Admin Panel**: Full CRUD operations for managing content
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Navigation Aids**: Table of contents, breadcrumbs, and prev/next buttons
+- **Code Highlighting**: Syntax highlighting for code snippets
+- **Keyboard Shortcuts**: Enhanced navigation with keyboard controls
 
 ## Installation
 
-1. Clone the repository
-2. Install dependencies:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/OntheEdgeTech/TechHandBook.git
+   cd combined-docs-app
    ```
+
+2. Install dependencies:
+   ```bash
    pip install -r requirements.txt
    ```
+
 3. Run the application:
-   ```
+   ```bash
    python app.py
    ```
 
+4. Access the app at `http://localhost` (port 80)
+
 ## Usage
 
-1. **Browsing Documentation**: 
-   - Visit the homepage to see available courses
-   - Click on a course to start browsing documentation
-   - Use the sidebar to navigate between documents
-   - Use the search bar to find specific content across all courses
-   - Table of contents is available on the right side of document pages
+### Browsing Documentation
 
-2. **Admin Panel**:
-   - Visit `/login` to access the admin panel
-   - Default credentials: admin / password123
+- Visit the homepage to see available courses
+- Click on a course to start browsing documentation
+- Use the sidebar to navigate between documents
+- Use the search bar to find specific content across all courses
+- Table of contents is available on document pages
+
+### Admin Panel
+
+1. Visit `/login` to access the admin panel
+2. Default credentials: `admin` / `password123`
+3. Manage courses and documents:
    - Create, edit, and delete courses
-   - Manage documents within courses
+   - Add, update, and remove documents within courses
    - Preview Markdown content in real-time
-   - Drag and drop to reorder courses
+   - Reorder courses with drag and drop
    - Bulk import documents via drag and drop
 
 ## Directory Structure
@@ -60,7 +72,7 @@ combined-docs-app/
 │       └── 3. processes.md
 ├── media/              # Static media files
 ├── static/             # CSS and JavaScript files
-│   ├── docs.css        # Main stylesheet
+│   ├── docs_theme.css  # Main stylesheet
 │   └── docs.js         # Client-side JavaScript
 └── templates/          # HTML templates
     ├── docs.html       # Documentation page
@@ -73,9 +85,9 @@ combined-docs-app/
 ## Technology Stack
 
 - **Flask**: Python web framework
-- **Markdown**: Content formatting
-- **Fuse.js**: Client-side search
-- **HTML/CSS/JavaScript**: Frontend
+- **Markdown**: Content formatting with extensions
+- **Fuse.js**: Client-side search functionality
+- **HTML/CSS/JavaScript**: Frontend implementation
 
 ## Customization
 
@@ -83,100 +95,27 @@ You can customize the application by:
 
 1. **Adding Courses**: Use the admin panel to create new courses
 2. **Adding Documents**: Use the admin panel to add documents to courses
-3. **Styling**: Modify `static/docs.css` to change the appearance
+3. **Styling**: Modify `static/docs_theme.css` to change the appearance
 4. **Functionality**: Update `static/docs.js` for client-side enhancements
 5. **Templates**: Modify HTML templates in the `templates/` directory
 
 ## Security Note
 
-For production use, make sure to:
+For production deployment, make sure to:
+
 1. Change the secret key in `app.py`
 2. Change the default admin credentials
 3. Implement proper authentication and authorization
+4. Use HTTPS in production
 
-## UI Improvements
+## Contributing
 
-The UI has been significantly enhanced with:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a pull request
 
-### 1. Loading States
-- Loading spinners for search results
-- Skeleton screens when content is loading
-- Progress indicators for long operations
+## License
 
-### 2. Better Mobile Navigation
-- Collapsible TOC on mobile with dedicated toggle button
-- Improved touch targets for navigation
-- Responsive design that adapts to all screen sizes
-
-### 3. Enhanced Search Experience
-- Real-time search with debouncing
-- Search result highlighting
-- Keyboard navigation for search results
-- Search history and past searches functionality
-
-### 4. Visual Feedback
-- Toast notifications for actions
-- Progress indicators for long operations
-- Better error messaging with contextual information
-
-### 5. Interactive Elements
-- Code snippet copy buttons with visual feedback
-- Expandable/collapsible sections
-- Image lightbox for diagrams and screenshots
-- Keyboard shortcuts for common actions
-
-### 6. Navigation Enhancements
-- Breadcrumb dropdown for quick course switching
-- Recently viewed documents section
-- Bookmark/favorite documents (stored in localStorage)
-
-### 7. Content Presentation
-- Dark-themed code blocks with syntax highlighting
-- Math formula rendering (via extensions)
-- Diagram support (via extensions)
-
-### 8. Admin Panel Improvements
-- Drag-and-drop document reordering
-- Bulk operations (import/export via drag and drop)
-- Version history for documents (conceptual)
-- User management (extensible for multi-user support)
-
-### 9. Performance Features
-- Lazy loading for images
-- Prefetching of next documents
-- Offline support (PWA-ready structure)
-
-### 10. Accessibility
-- Better ARIA labels for screen readers
-- Keyboard shortcuts documentation
-- Screen reader improvements
-- Focus management for keyboard navigation
-
-## Search Functionality
-
-The application now includes powerful search capabilities:
-
-1. **Global Search**: Search across all courses and documents from the homepage, courses page, or any document page
-2. **Contextual Results**: Search results show the document name, course, and content excerpt
-3. **Real-time Search**: Results update as you type with debouncing to prevent excessive requests
-4. **Direct Navigation**: Click on search results to go directly to the relevant document
-5. **Keyboard Navigation**: Use arrow keys and Enter to navigate search results
-
-## Mobile Experience
-
-The mobile experience has been completely revamped:
-
-1. **Responsive Design**: Adapts to all screen sizes
-2. **Mobile TOC**: Dedicated table of contents button for mobile devices
-3. **Touch Optimized**: Larger touch targets for better mobile interaction
-4. **Performance**: Optimized loading and rendering for mobile devices
-
-## Admin Panel Features
-
-The admin panel includes advanced functionality:
-
-1. **Course Management**: Create, edit, delete, and reorder courses
-2. **Document Management**: Create, edit, and delete documents within courses
-3. **Bulk Operations**: Import multiple documents via drag and drop
-4. **Visual Feedback**: Toast notifications for all actions
-5. **Responsive Design**: Works on all device sizes
+This project is licensed under the MIT License
