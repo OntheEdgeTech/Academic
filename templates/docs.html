@@ -5,11 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ course | default('Docs') | capitalize }} – Documentation</title>
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/x-icon" href="/media/logo.png">
 
     <!-- Core stylesheet (served from Flask static/) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='docs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='docs_theme.css') }}">
 </head>
 
 <body data-course="{{ course }}" data-active-file="{{ active_file }}">
@@ -17,7 +17,7 @@
         <!-- Top Bar -->
         <header class="topbar" role="banner">
             <div class="topbar-inner">
-                <button id="sidebarToggle" class="toggle" aria-controls="sidebar" aria-expanded="false"
+                <button id="sidebarToggle" class="btn-icon" aria-controls="sidebar" aria-expanded="false"
                     title="Toggle sidebar (Ctrl+B)">
                     <!-- Hamburger icon -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -28,15 +28,39 @@
                 </button>
 
                 <a href="/" class="brand" aria-label="Landing Page">
-                    <img src="/media/logo.png" alt="ontheedge" width="36px">
+                    <img src="/media/logo.png" alt="ontheedge">
                     <span class="name">Tech Handbook</span>
                 </a>
 
-                <div class="search">
-                    <input id="searchInput" type="search" placeholder="Search docs… (Ctrl+/)" autocomplete="off" />
+                <div class="nav-links">
+                    <a href="{{ url_for('docs_landing') }}" class="nav-link">Documentation</a>
+                    <a href="#" class="nav-link">Resources</a>
+                    <a href="#" class="nav-link">Community</a>
+                </div>
+
+                <div class="search-container">
+                    <input id="searchInput" type="search" class="search-input" placeholder="Search docs… (Ctrl+/)" autocomplete="off" />
+                    <div class="search-results-container" id="topSearchResults"></div>
+                </div>
+                
+                <div class="auth-links">
+                    {% if session.admin %}
+                        <a href="{{ url_for('admin') }}" class="btn btn-secondary">Admin</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">Admin Login</a>
+                    {% endif %}
                 </div>
             </div>
         </header>
+
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="/">Home</a> &gt; 
+            <a href="/docs">Courses</a> &gt; 
+            <a href="/docs/{{ course }}">{{ course }}</a> &gt; 
+            <span>{{ active_file.replace('.md', '') }}</span>
+        </div>
 
         <!-- Workspace -->
         <div class="workspace">
@@ -65,20 +89,26 @@
                     <article class="doc-content">{{ content | safe }}</article>
                 </div>
             </main>
+            
+            <!-- Table of Contents Sidebar -->
+            <aside class="toc-sidebar" role="complementary" aria-label="Table of Contents">
+                <div class="label">Table of Contents</div>
+                <div id="toc-container"></div>
+            </aside>
         </div>
 
         <!-- Footer -->
         <footer class="footer" role="contentinfo">
             <div class="footer-inner">
-                <div class="brand-mini">
-                    <img src="/media/logo.png" alt="ontheedge" width="24px">
-                    <span><a href="https://github.com/OntheEdgeTech" style="color: yellow;">OnTheEdge Tech</a></span>
-                </div>
+                <a href="/" class="brand-mini">
+                    <img src="/media/logo.png" alt="ontheedge">
+                    <span>OnTheEdge Tech</span>
+                </a>
                 <div class="nav-cta">
                     {% set idx = files.index(active_file) if active_file in files else -1 %}
                     {% set prev_file = files[idx-1] if idx > 0 else None %}
                     {% set next_file = files[idx+1] if idx != -1 and idx < files|length - 1 else None %} {% if prev_file
-                        %} <a class="btn btn-ghost" href="{{ url_for('serve_doc', course=course, filename=prev_file) }}"
+                        %} <a class="btn btn-secondary" href="{{ url_for('serve_doc', course=course, filename=prev_file) }}"
                         rel="prev">
                         <span aria-hidden="true">←</span>
                         <span>Prev</span>
@@ -87,7 +117,7 @@
                         {% endif %}
 
                         {% if next_file %}
-                        <a class="btn btn-cta" href="{{ url_for('serve_doc', course=course, filename=next_file) }}"
+                        <a class="btn btn-primary" href="{{ url_for('serve_doc', course=course, filename=next_file) }}"
                             rel="next">
                             <span>Next</span>
                             <span class="k">{{ next_file.rsplit('.',1)[0] }}</span>
@@ -98,8 +128,68 @@
             </div>
         </footer>
     </div>
+    
+    <!-- Lightbox for images -->
+    <div class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" src="" alt="">
+    </div>
+    
+    <!-- Mobile TOC Toggle -->
+    <button class="mobile-toc-toggle" aria-label="Toggle table of contents">☰</button>
+    
+    <!-- Mobile TOC -->
+    <div class="mobile-toc">
+        <div class="label">Table of Contents</div>
+        <div id="mobile-toc-container"></div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+    
     <!-- Core JS (served from Flask static/) -->
     <script src="{{ url_for('static', filename='docs.js') }}" defer></script>
+    <script>
+        // Generate table of contents
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.querySelector('.doc-content');
+            if (!content) return;
+            
+            const headings = content.querySelectorAll('h1, h2, h3');
+            if (headings.length < 2) return;
+            
+            // Desktop TOC
+            const tocContainer = document.getElementById('toc-container');
+            if (tocContainer) {
+                const toc = document.createElement('ul');
+                
+                headings.forEach((heading, index) => {
+                    // Add ID to heading if it doesn't have one
+                    if (!heading.id) {
+                        heading.id = `heading-${index}`;
+                    }
+                    
+                    const link = document.createElement('a');
+                    link.href = `#${heading.id}`;
+                    link.textContent = heading.textContent;
+                    
+                    const listItem = document.createElement('li');
+                    listItem.className = `toc-${heading.tagName.toLowerCase()}`;
+                    listItem.appendChild(link);
+                    
+                    toc.appendChild(listItem);
+                });
+                
+                tocContainer.appendChild(toc);
+            }
+            
+            // Mobile TOC
+            const mobileTocContainer = document.getElementById('mobile-toc-container');
+            if (mobileTocContainer) {
+                mobileTocContainer.innerHTML = tocContainer ? tocContainer.innerHTML : '';
+            }
+        });
+    </script>
 </body>
 
 </html>

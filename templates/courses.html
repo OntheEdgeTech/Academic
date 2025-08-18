@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Courses – Tech Handbook</title>
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/x-icon" href="/media/logo.png">
+
+    <!-- Core stylesheet (served from Flask static/) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='docs_theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='docs.css') }}">
+</head>
+
+<body>
+    <div class="shell">
+        <!-- Top Bar -->
+        <header class="topbar" role="banner">
+            <div class="topbar-inner">
+                <button id="sidebarToggle" class="btn-icon" aria-controls="sidebar" aria-expanded="false"
+                    title="Toggle sidebar (Ctrl+B)">
+                    <!-- Hamburger icon -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+
+                <a href="/" class="brand" aria-label="Landing Page">
+                    <img src="/media/logo.png" alt="ontheedge">
+                    <span class="name">Tech Handbook</span>
+                </a>
+
+                <div class="nav-links">
+                    <a href="{{ url_for('docs_landing') }}" class="nav-link">Documentation</a>
+                    <a href="#" class="nav-link">Resources</a>
+                    <a href="#" class="nav-link">Community</a>
+                </div>
+
+                <div class="search-container">
+                    <input id="searchInput" type="search" class="search-input" placeholder="Search docs… (Ctrl+/)" autocomplete="off" />
+                    <div class="search-results-container" id="topSearchResults"></div>
+                </div>
+                
+                <div class="auth-links">
+                    {% if session.admin %}
+                        <a href="{{ url_for('admin') }}" class="btn btn-secondary">Admin</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">Admin Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content" role="main">
+            <div class="content-inner">
+                <div class="courses-header">
+                    <h1 class="section-title">Available Courses</h1>
+                    <p class="section-subtitle">Explore our comprehensive documentation on various technical topics</p>
+                    
+                    <div class="hero-search">
+                        <input type="text" id="courseSearch" class="search-input" placeholder="Search courses or documents...">
+                        <div class="search-results-container" id="courseSearchResults"></div>
+                    </div>
+                </div>
+                
+                <div class="courses-grid">
+                    {% if courses %}
+                        {% for course in courses %}
+                        <div class="course-card" data-course="{{ course.name }}">
+                            <h3>{{ course.name }}</h3>
+                            <p>{{ course.description or "Dive into our comprehensive " + course.name + " documentation." }}</p>
+                            <a href="{{ url_for('serve_doc', course=course.name) }}" class="course-link">Start Learning →</a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: var(--text-tertiary); grid-column: 1 / -1;">No courses available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer" role="contentinfo">
+            <div class="footer-inner">
+                <a href="/" class="brand-mini">
+                    <img src="/media/logo.png" alt="ontheedge">
+                    <span>OnTheEdge Tech</span>
+                </a>
+                <div>
+                    <a href="https://github.com/OntheEdgeTech" class="nav-link">GitHub</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+    
+    <script>
+        // Course search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const courseSearch = document.getElementById('courseSearch');
+            const courseCards = document.querySelectorAll('.course-card');
+            const resultsContainer = document.getElementById('courseSearchResults');
+            
+            if (courseSearch && courseCards.length > 0 && resultsContainer) {
+                let searchTimeout;
+                
+                courseSearch.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    const searchTerm = this.value.toLowerCase();
+                    
+                    if (searchTerm.length > 2) {
+                        // Show loading spinner
+                        resultsContainer.innerHTML = `
+                            <div class="search-result-item">
+                                <div class="loading-spinner" style="margin: 10px auto;"></div>
+                            </div>
+                        `;
+                        resultsContainer.style.display = 'block';
+                        
+                        // Debounce search requests
+                        searchTimeout = setTimeout(() => {
+                            // Search across all documents
+                            fetch(`/api/search?q=${encodeURIComponent(searchTerm)}`)
+                            .then(response => response.json())
+                            .then(results => {
+                                if (results.length > 0) {
+                                    let html = '';
+                                    results.slice(0, 10).forEach(result => {
+                                        html += `
+                                        <div class="search-result-item" onclick="window.location.href='/docs/${encodeURIComponent(result.course)}/${encodeURIComponent(result.document)}'">
+                                            <div class="search-result-title">${result.document}</div>
+                                            <div class="search-result-course">${result.course}</div>
+                                            <div class="search-result-excerpt">${result.excerpt.substring(0, 100)}...</div>
+                                        </div>
+                                        `;
+                                    });
+                                    resultsContainer.innerHTML = html;
+                                } else {
+                                    resultsContainer.innerHTML = '<div class="search-result-item">No results found</div>';
+                                }
+                            })
+                            .catch(() => {
+                                resultsContainer.innerHTML = '<div class="search-result-item">Error searching</div>';
+                            });
+                        }, 300);
+                    } else {
+                        // Hide search results
+                        resultsContainer.style.display = 'none';
+                        
+                        // Filter courses by name/description
+                        courseCards.forEach(card => {
+                            const courseName = card.getAttribute('data-course').toLowerCase();
+                            const courseDescription = card.querySelector('p').textContent.toLowerCase();
+                            
+                            if (courseName.includes(searchTerm) || courseDescription.includes(searchTerm)) {
+                                card.style.display = '';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+                
+                // Hide search results when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (courseSearch && resultsContainer && 
+                        !courseSearch.contains(e.target) && !resultsContainer.contains(e.target)) {
+                        resultsContainer.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Top bar search functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('topSearchResults');
+            
+            if (searchInput && searchResults) {
+                let searchTimeout;
+                
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    const query = this.value.trim();
+                    
+                    if (query.length > 2) {
+                        // Show loading spinner
+                        searchResults.innerHTML = `
+                            <div class="search-result-item">
+                                <div class="loading-spinner" style="margin: 10px auto;"></div>
+                            </div>
+                        `;
+                        searchResults.style.display = 'block';
+                        
+                        // Debounce search requests
+                        searchTimeout = setTimeout(() => {
+                            fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(results => {
+                                if (results.length > 0) {
+                                    let html = '';
+                                    results.slice(0, 10).forEach(result => {
+                                        html += `
+                                        <div class="search-result-item" onclick="window.location.href='/docs/${encodeURIComponent(result.course)}/${encodeURIComponent(result.document)}'">
+                                            <div class="search-result-title">${result.document}</div>
+                                            <div class="search-result-course">${result.course}</div>
+                                            <div class="search-result-excerpt">${result.excerpt.substring(0, 100)}...</div>
+                                        </div>
+                                        `;
+                                    });
+                                    searchResults.innerHTML = html;
+                                } else {
+                                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                                }
+                            })
+                            .catch(() => {
+                                searchResults.innerHTML = '<div class="search-result-item">Error searching</div>';
+                            });
+                        }, 300);
+                    } else {
+                        searchResults.style.display = 'none';
+                    }
+                });
+                
+                // Hide search results when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (searchInput && searchResults && 
+                        !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        searchResults.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
