@@ -22,7 +22,7 @@ A modern, feature-rich documentation platform that combines the best features of
 1. Clone the repository:
    ```bash
    git clone https://github.com/OntheEdgeTech/TechHandBook.git
-   cd combined-docs-app
+   cd TechHandBook
    ```
 
 2. Install dependencies:
@@ -36,6 +36,26 @@ A modern, feature-rich documentation platform that combines the best features of
    ```
 
 4. Access the app at `http://localhost` (port 80)
+
+### Via Dockero
+
+> get dockero : https://github.com/the-abra/dockero/
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/OntheEdgeTech/TechHandBook.git
+   cd TechHandBook
+   ```
+
+2. Setup and run:
+   ```bash
+   dockero setup .
+   ```
+
+3. Run after setup:
+   ```bash
+      dockero run handbook
+   ```
 
 ## Usage
 
