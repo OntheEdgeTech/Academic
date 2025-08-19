@@ -1594,6 +1594,197 @@ a:hover {
   margin-top: var(--spacing-xl);
 }
 
+/* Markdown Editor */
+.editor-container {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--panel-2);
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-btn {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: var(--transition-fast);
+}
+
+.editor-btn:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+}
+
+.editor-content {
+  position: relative;
+}
+
+.editor-textarea {
+  min-height: 400px;
+  resize: vertical;
+  font-family: var(--mono);
+  background: var(--panel);
+  border: none;
+  border-radius: 0;
+}
+
+.editor-preview {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--spacing-md);
+  background: var(--panel);
+  overflow: auto;
+  display: none;
+  min-height: 400px;
+}
+
+.editor-preview.active {
+  display: block;
+}
+
+.editor-preview-content {
+  line-height: 1.6;
+}
+
+.editor-preview-content h1,
+.editor-preview-content h2,
+.editor-preview-content h3 {
+  color: var(--accent);
+  margin: 1.5em 0 0.75em;
+  line-height: 1.3;
+}
+
+.editor-preview-content h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--spacing-md);
+}
+
+.editor-preview-content h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.editor-preview-content h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.editor-preview-content p {
+  margin-bottom: 1.25em;
+  color: var(--text);
+}
+
+.editor-preview-content a {
+  color: var(--link);
+  text-decoration: underline;
+  transition: var(--transition-fast);
+}
+
+.editor-preview-content a:hover {
+  color: var(--accent);
+}
+
+.editor-preview-content code {
+  font-family: var(--mono);
+  background: var(--panel-2);
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--border);
+}
+
+.editor-preview-content pre {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  padding: var(--spacing-md);
+  border-radius: var(--radius);
+  overflow: auto;
+  margin: var(--spacing-md) 0;
+  position: relative;
+  box-shadow: var(--shadow);
+}
+
+.editor-preview-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--font-size-sm);
+}
+
+.editor-preview-content img,
+.editor-preview-content video,
+.editor-preview-content audio {
+  max-width: 100%;
+  display: block;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow);
+}
+
+.editor-preview-content table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow);
+}
+
+.editor-preview-content th,
+.editor-preview-content td {
+  border-bottom: 1px solid var(--border);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+}
+
+.editor-preview-content th {
+  background: var(--panel-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+.editor-preview-content blockquote {
+  border-left: 4px solid var(--accent);
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  background: var(--accent-weak);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.editor-preview-content blockquote p {
+  margin-bottom: 0;
+  color: var(--text);
+}
+
+.editor-preview-content ul,
+.editor-preview-content ol {
+  margin: var(--spacing-md) 0;
+  padding-left: var(--spacing-xl);
+}
+
+.editor-preview-content li {
+  margin-bottom: var(--spacing-xs);
+  color: var(--text);
+}
+
 /* Login Page */
 .login-container {
   max-width: 400px;

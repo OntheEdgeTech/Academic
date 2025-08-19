@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Tech Handbook</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='docs_theme.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <script>
+        // Fallback if markdown-it fails to load
+        window.addEventListener('load', function() {
+            if (typeof markdownit === 'undefined') {
+                console.warn('markdown-it library not loaded. Preview will use basic HTML escaping.');
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="shell">
@@ -320,7 +329,7 @@
 
     <!-- Document Modal -->
     <div class="admin-modal" id="document-modal">
-        <div class="admin-modal-content">
+        <div class="admin-modal-content" style="max-width: 900px; width: 90%;">
             <div class="admin-modal-header">
                 <h3 id="document-modal-title">Add New Document</h3>
                 <button class="admin-modal-close">&times;</button>
@@ -335,12 +344,33 @@
                     </div>
                     <div class="admin-form-group">
                         <label for="document-content">Content *</label>
-                        <textarea class="admin-form-control" id="document-content" rows="10" required></textarea>
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <button type="button" class="editor-btn" data-command="bold" title="Bold (Ctrl+B)">𝐁</button>
+                                <button type="button" class="editor-btn" data-command="italic" title="Italic (Ctrl+I)">𝐼</button>
+                                <button type="button" class="editor-btn" data-command="heading" title="Heading (Ctrl+H)">H</button>
+                                <button type="button" class="editor-btn" data-command="link" title="Link (Ctrl+K)">🔗</button>
+                                <button type="button" class="editor-btn" data-command="image" title="Image">🖼️</button>
+                                <button type="button" class="editor-btn" data-command="code" title="Code Block">{}
+                                </button>
+                                <button type="button" class="editor-btn" data-command="quote" title="Quote">❝</button>
+                                <button type="button" class="editor-btn" data-command="list-ul" title="Bullet List">•</button>
+                                <button type="button" class="editor-btn" data-command="list-ol" title="Numbered List">1.</button>
+                                <button type="button" class="editor-btn" data-command="hr" title="Horizontal Rule">―</button>
+                                <button type="button" class="editor-btn preview-toggle" id="preview-toggle" title="Toggle Preview">👁️</button>
+                                <button type="button" class="editor-btn edit-toggle" id="edit-toggle" title="Edit Document" style="display: none;">✏️</button>
+                            </div>
+                            <div class="editor-content">
+                                <textarea class="admin-form-control editor-textarea" id="document-content" required></textarea>
+                                <div class="editor-preview" id="editor-preview"></div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="admin-modal-footer">
                 <button class="admin-btn admin-btn-secondary" id="document-modal-close">Cancel</button>
+                <button class="admin-btn admin-btn-secondary" id="edit-document-btn" style="display: none;">Edit</button>
                 <button class="admin-btn admin-btn-primary" id="document-modal-save">Save Document</button>
             </div>
         </div>
@@ -350,6 +380,238 @@
     <div class="toast-container"></div>
 
     <script>
+        // Keep track of whether the markdown editor is already initialized
+        let markdownEditorInitialized = false;
+        
+        // Define all markdown editor functions in global scope
+        function initMarkdownEditor() {
+            // Check if required elements exist
+            const editorTextarea = document.getElementById('document-content');
+            const editorPreview = document.getElementById('editor-preview');
+            const previewToggle = document.getElementById('preview-toggle');
+            
+            if (!editorTextarea || !editorPreview || !previewToggle) {
+                console.warn('Markdown editor elements not found, skipping initialization');
+                return;
+            }
+            
+            // If already initialized, don't do it again
+            if (markdownEditorInitialized) {
+                return;
+            }
+            
+            // Mark as initialized
+            markdownEditorInitialized = true;
+            
+            // Add event listeners for editor buttons
+            function editorClickHandler(e) {
+                // Handle editor button clicks
+                if (e.target.matches('.editor-btn') || e.target.closest('.editor-btn')) {
+                    e.preventDefault();
+                    const button = e.target.matches('.editor-btn') ? e.target : e.target.closest('.editor-btn');
+                    const command = button.getAttribute('data-command');
+                    if (command) {
+                        handleEditorCommand(command);
+                    }
+                }
+            }
+            
+            // Remove any existing listener and add the new one
+            document.removeEventListener('click', editorClickHandler, true);
+            document.addEventListener('click', editorClickHandler, true);
+            
+            // Handle preview toggle separately
+            function previewToggleHandler(e) {
+                e.preventDefault();
+                togglePreview();
+            }
+            
+            // Handle edit toggle separately
+            function editToggleHandler(e) {
+                e.preventDefault();
+                togglePreview();
+            }
+            
+            // Remove any existing listener and add the new one
+            previewToggle.removeEventListener('click', previewToggleHandler);
+            previewToggle.addEventListener('click', previewToggleHandler);
+            
+            // Remove any existing listener and add the new one for edit button
+            const editToggle = document.getElementById('edit-toggle');
+            if (editToggle) {
+                editToggle.removeEventListener('click', editToggleHandler);
+                editToggle.addEventListener('click', editToggleHandler);
+            }
+            
+            // Handle keyboard shortcuts
+            function keydownHandler(e) {
+                // Ctrl+B for bold
+                if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                    e.preventDefault();
+                    handleEditorCommand('bold');
+                }
+                // Ctrl+I for italic
+                else if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+                    e.preventDefault();
+                    handleEditorCommand('italic');
+                }
+                // Ctrl+H for heading
+                else if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                    e.preventDefault();
+                    handleEditorCommand('heading');
+                }
+                // Ctrl+K for link
+                else if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    handleEditorCommand('link');
+                }
+            }
+            
+            // Remove any existing listener and add the new one
+            editorTextarea.removeEventListener('keydown', keydownHandler);
+            editorTextarea.addEventListener('keydown', keydownHandler);
+            
+            // Handle edit document button in footer
+            const editDocumentBtn = document.getElementById('edit-document-btn');
+            if (editDocumentBtn) {
+                function editDocumentHandler(e) {
+                    e.preventDefault();
+                    togglePreview();
+                }
+                
+                // Remove any existing listener and add the new one
+                editDocumentBtn.removeEventListener('click', editDocumentHandler);
+                editDocumentBtn.addEventListener('click', editDocumentHandler);
+            }
+        }
+        
+        function handleEditorCommand(command) {
+            const editor = document.getElementById('document-content');
+            if (!editor) return;
+            
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const selectedText = editor.value.substring(start, end);
+            let newText = '';
+            let cursorPos = start;
+            
+            switch (command) {
+                case 'bold':
+                    newText = `**${selectedText}**`;
+                    cursorPos = start + 2;
+                    break;
+                case 'italic':
+                    newText = `*${selectedText}*`;
+                    cursorPos = start + 1;
+                    break;
+                case 'heading':
+                    newText = `# ${selectedText}`;
+                    cursorPos = start + 2;
+                    break;
+                case 'link':
+                    newText = `[${selectedText}](url)`;
+                    cursorPos = start + selectedText.length + 3;
+                    break;
+                case 'image':
+                    newText = `![alt text](image-url)`;
+                    cursorPos = start + 2;
+                    break;
+                case 'code':
+                    newText = '```\n' + selectedText + '\n```';
+                    cursorPos = start + 4;
+                    break;
+                case 'quote':
+                    newText = `> ${selectedText}`;
+                    cursorPos = start + 2;
+                    break;
+                case 'list-ul':
+                    newText = selectedText.split('\n').map(line => `- ${line}`).join('\n');
+                    cursorPos = start + 2;
+                    break;
+                case 'list-ol':
+                    const lines = selectedText.split('\n');
+                    newText = lines.map((line, i) => `${i + 1}. ${line}`).join('\n');
+                    cursorPos = start + 3;
+                    break;
+                case 'hr':
+                    newText = `${selectedText}\n\n---\n\n`;
+                    cursorPos = start + selectedText.length + 6;
+                    break;
+            }
+            
+            // Update textarea
+            editor.value = editor.value.substring(0, start) + newText + editor.value.substring(end);
+            
+            // Set cursor position
+            editor.focus();
+            editor.setSelectionRange(cursorPos, cursorPos + selectedText.length);
+        }
+        
+        function togglePreview() {
+            const editorPreview = document.getElementById('editor-preview');
+            const editorTextarea = document.getElementById('document-content');
+            const previewToggle = document.getElementById('preview-toggle');
+            const editToggle = document.getElementById('edit-toggle');
+            const editDocumentBtn = document.getElementById('edit-document-btn');
+            const editorToolbar = document.querySelector('.editor-toolbar');
+            
+            if (editorPreview && editorTextarea && previewToggle && editToggle) {
+                const isPreviewActive = editorPreview.classList.contains('active');
+                if (isPreviewActive) {
+                    // Switch to editor
+                    editorPreview.classList.remove('active');
+                    editorTextarea.style.display = 'block';
+                    previewToggle.style.display = 'inline-block';
+                    editToggle.style.display = 'none';
+                    // Hide the edit document button in footer when in edit mode
+                    if (editDocumentBtn) {
+                        editDocumentBtn.style.display = 'none';
+                    }
+                    // Show toolbar when in edit mode
+                    if (editorToolbar) {
+                        editorToolbar.style.display = 'flex';
+                    }
+                } else {
+                    // Switch to preview
+                    if (typeof markdownit !== 'undefined') {
+                        const md = markdownit({
+                            html: false,
+                            xhtmlOut: false,
+                            breaks: true,
+                            linkify: true,
+                            typographer: true
+                        });
+                        editorPreview.innerHTML = '<div class="editor-preview-content">' + 
+                            md.render(editorTextarea.value) + '</div>';
+                    } else {
+                        // Fallback to escaped HTML
+                        const escapeHtml = (text) => {
+                            const div = document.createElement('div');
+                            div.textContent = text;
+                            return div.innerHTML;
+                        };
+                        editorPreview.innerHTML = '<div class="editor-preview-content">' + 
+                            '<p>Markdown preview requires additional library.</p>' +
+                            '<p>Please add markdown-it library to enable preview.</p>' +
+                            '<pre>' + escapeHtml(editorTextarea.value) + '</pre>' + 
+                            '</div>';
+                    }
+                    editorPreview.classList.add('active');
+                    editorTextarea.style.display = 'none';
+                    previewToggle.style.display = 'none';
+                    editToggle.style.display = 'inline-block';
+                    // Show the edit document button in footer when in preview mode
+                    if (editDocumentBtn) {
+                        editDocumentBtn.style.display = 'inline-block';
+                    }
+                    // Hide toolbar when in preview mode
+                    if (editorToolbar) {
+                        editorToolbar.style.display = 'none';
+                    }
+                }
+            }
+        }
+        
         // Admin Panel Functionality
         document.addEventListener('DOMContentLoaded', function() {
             // Tab switching
@@ -381,13 +643,23 @@
             
             closeButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    this.closest('.admin-modal').style.display = 'none';
+                    const modal = this.closest('.admin-modal');
+                    modal.style.display = 'none';
+                    // Reset markdown editor initialization when document modal is closed
+                    if (modal.id === 'document-modal') {
+                        markdownEditorInitialized = false;
+                    }
                 });
             });
             
             cancelButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    this.closest('.admin-modal').style.display = 'none';
+                    const modal = this.closest('.admin-modal');
+                    modal.style.display = 'none';
+                    // Reset markdown editor initialization when document modal is closed
+                    if (modal.id === 'document-modal') {
+                        markdownEditorInitialized = false;
+                    }
                 });
             });
             
@@ -395,9 +667,183 @@
                 modals.forEach(modal => {
                     if (event.target === modal) {
                         modal.style.display = 'none';
+                        // Reset markdown editor initialization when document modal is closed
+                        if (modal.id === 'document-modal') {
+                            markdownEditorInitialized = false;
+                        }
                     }
                 });
             });
+            
+            // Markdown Editor Functionality
+            // (All functions moved to global scope above)
+            
+            function handleEditorCommand(command) {
+                const editor = document.getElementById('document-content');
+                if (!editor) return;
+                
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                const selectedText = editor.value.substring(start, end);
+                let newText = '';
+                let cursorPos = start;
+                
+                switch (command) {
+                    case 'bold':
+                        newText = `**${selectedText}**`;
+                        cursorPos = start + 2;
+                        break;
+                    case 'italic':
+                        newText = `*${selectedText}*`;
+                        cursorPos = start + 1;
+                        break;
+                    case 'heading':
+                        newText = `# ${selectedText}`;
+                        cursorPos = start + 2;
+                        break;
+                    case 'link':
+                        newText = `[${selectedText}](url)`;
+                        cursorPos = start + selectedText.length + 3;
+                        break;
+                    case 'image':
+                        newText = `![alt text](image-url)`;
+                        cursorPos = start + 2;
+                        break;
+                    case 'code':
+                        newText = '```\n' + selectedText + '\n```';
+                        cursorPos = start + 4;
+                        break;
+                    case 'quote':
+                        newText = `> ${selectedText}`;
+                        cursorPos = start + 2;
+                        break;
+                    case 'list-ul':
+                        newText = selectedText.split('\n').map(line => `- ${line}`).join('\n');
+                        cursorPos = start + 2;
+                        break;
+                    case 'list-ol':
+                        const lines = selectedText.split('\n');
+                        newText = lines.map((line, i) => `${i + 1}. ${line}`).join('\n');
+                        cursorPos = start + 3;
+                        break;
+                    case 'hr':
+                        newText = `${selectedText}\n\n---\n\n`;
+                        cursorPos = start + selectedText.length + 6;
+                        break;
+                }
+                
+                // Update textarea
+                editor.value = editor.value.substring(0, start) + newText + editor.value.substring(end);
+                
+                // Set cursor position
+                editor.focus();
+                editor.setSelectionRange(cursorPos, cursorPos + selectedText.length);
+            }
+            
+            function togglePreview() {
+                const editorPreview = document.getElementById('editor-preview');
+                const editorTextarea = document.getElementById('document-content');
+                const previewToggle = document.getElementById('preview-toggle');
+                const editToggle = document.getElementById('edit-toggle');
+                const editorToolbar = document.querySelector('.editor-toolbar');
+                
+                if (editorPreview && editorTextarea && previewToggle && editToggle) {
+                    const isPreviewActive = editorPreview.classList.contains('active');
+                    if (isPreviewActive) {
+                        // Switch to editor
+                        editorPreview.classList.remove('active');
+                        editorTextarea.style.display = 'block';
+                        previewToggle.style.display = 'inline-block';
+                        editToggle.style.display = 'none';
+                        // Show toolbar when in edit mode
+                        if (editorToolbar) {
+                            editorToolbar.style.display = 'flex';
+                        }
+                    } else {
+                        // Switch to preview
+                        if (typeof markdownit !== 'undefined') {
+                            const md = markdownit({
+                                html: false,
+                                xhtmlOut: false,
+                                breaks: true,
+                                linkify: true,
+                                typographer: true
+                            });
+                            editorPreview.innerHTML = '<div class="editor-preview-content">' + 
+                                md.render(editorTextarea.value) + '</div>';
+                        } else {
+                            // Fallback to escaped HTML
+                            const escapeHtml = (text) => {
+                                const div = document.createElement('div');
+                                div.textContent = text;
+                                return div.innerHTML;
+                            };
+                            editorPreview.innerHTML = '<div class="editor-preview-content">' + 
+                                '<p>Markdown preview requires additional library.</p>' +
+                                '<p>Please add markdown-it library to enable preview.</p>' +
+                                '<pre>' + escapeHtml(editorTextarea.value) + '</pre>' + 
+                                '</div>';
+                        }
+                        editorPreview.classList.add('active');
+                        editorTextarea.style.display = 'none';
+                        previewToggle.style.display = 'none';
+                        editToggle.style.display = 'inline-block';
+                        // Hide toolbar when in preview mode
+                        if (editorToolbar) {
+                            editorToolbar.style.display = 'none';
+                        }
+                    }
+                }
+            }
+            
+            // Initialize markdown editor when document modal is shown
+            function setupDocumentModalObserver() {
+                const documentModal = document.getElementById('document-modal');
+                if (documentModal) {
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                if (documentModal.style.display === 'flex') {
+                                    // Small delay to ensure DOM is fully rendered
+                                    setTimeout(initMarkdownEditor, 100);
+                                }
+                            }
+                        });
+                    });
+                    
+                    observer.observe(documentModal, {
+                        attributes: true,
+                        attributeFilter: ['style']
+                    });
+                }
+            }
+            
+            // Set up the observer
+            setupDocumentModalObserver();
+            
+            // Also initialize when showing the modal directly
+            document.getElementById('new-document-btn').addEventListener('click', function() {
+                if (!documentCourseSelector.value) return;
+                
+                document.getElementById('document-modal-title').textContent = 'Add New Document';
+                document.getElementById('document-form').reset();
+                document.getElementById('document-id').value = '';
+                document.getElementById('document-course').value = documentCourseSelector.value;
+                document.getElementById('document-modal').style.display = 'flex';
+                // Reset and initialize the editor
+                markdownEditorInitialized = false;
+                setTimeout(initMarkdownEditor, 100);
+            });
+            
+            // Initialize when editing a document
+            function setupEditDocumentButtons() {
+                document.querySelectorAll('.edit-doc').forEach(button => {
+                    button.addEventListener('click', function() {
+                        // We need to reattach the event listeners after the modal is populated
+                        setTimeout(initMarkdownEditor, 100);
+                    });
+                });
+            }
             
             // Course search
             const courseSearch = document.getElementById('course-search');
@@ -478,6 +924,7 @@
                 document.getElementById('document-id').value = '';
                 document.getElementById('document-course').value = documentCourseSelector.value;
                 document.getElementById('document-modal').style.display = 'flex';
+                initMarkdownEditor(); // Initialize when showing the modal
             });
             
             // Edit course buttons
@@ -653,6 +1100,7 @@
                 .then(result => {
                     if (result.message) {
                         document.getElementById('document-modal').style.display = 'none';
+                        markdownEditorInitialized = false; // Reset initialization flag
                         loadDocuments(courseName);
                         showToast('Document saved successfully', 'success');
                     } else {
@@ -719,6 +1167,9 @@
                                 deleteDocument(course, filename);
                             });
                         });
+                        
+                        // Initialize markdown editor for edit buttons
+                        setupEditDocumentButtons();
                     } else {
                         tbody.innerHTML = '<tr><td colspan="4" class="text-center">No documents found</td></tr>';
                     }
@@ -742,6 +1193,9 @@
                         document.getElementById('document-id').value = filename;
                         document.getElementById('document-course').value = courseName;
                         document.getElementById('document-modal').style.display = 'flex';
+                        // Reset and initialize the editor
+                        markdownEditorInitialized = false;
+                        setTimeout(initMarkdownEditor, 100);
                     } else {
                         showToast('Error loading document', 'error');
                     }
@@ -931,6 +1385,31 @@
                 }
             }, 5000);
         }
+        
+        // Initialize markdown editor when document modal is shown
+        function initMarkdownEditorOnModalShow() {
+            const documentModal = document.getElementById('document-modal');
+            if (documentModal) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            if (documentModal.style.display === 'flex') {
+                                // Small delay to ensure DOM is fully rendered
+                                setTimeout(initMarkdownEditor, 100);
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(documentModal, {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+            }
+        }
+        
+        // Call this function to set up the observer
+        initMarkdownEditorOnModalShow();
     </script>
 </body>
 </html>
