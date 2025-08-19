@@ -149,47 +149,6 @@
     
     <!-- Core JS (served from Flask static/) -->
     <script src="{{ url_for('static', filename='docs.js') }}" defer></script>
-    <script>
-        // Generate table of contents
-        document.addEventListener('DOMContentLoaded', function() {
-            const content = document.querySelector('.doc-content');
-            if (!content) return;
-            
-            const headings = content.querySelectorAll('h1, h2, h3');
-            if (headings.length < 2) return;
-            
-            // Desktop TOC
-            const tocContainer = document.getElementById('toc-container');
-            if (tocContainer) {
-                const toc = document.createElement('ul');
-                
-                headings.forEach((heading, index) => {
-                    // Add ID to heading if it doesn't have one
-                    if (!heading.id) {
-                        heading.id = `heading-${index}`;
-                    }
-                    
-                    const link = document.createElement('a');
-                    link.href = `#${heading.id}`;
-                    link.textContent = heading.textContent;
-                    
-                    const listItem = document.createElement('li');
-                    listItem.className = `toc-${heading.tagName.toLowerCase()}`;
-                    listItem.appendChild(link);
-                    
-                    toc.appendChild(listItem);
-                });
-                
-                tocContainer.appendChild(toc);
-            }
-            
-            // Mobile TOC
-            const mobileTocContainer = document.getElementById('mobile-toc-container');
-            if (mobileTocContainer) {
-                mobileTocContainer.innerHTML = tocContainer ? tocContainer.innerHTML : '';
-            }
-        });
-    </script>
 </body>
 
 </html>

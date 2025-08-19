@@ -1,4 +1,4 @@
-(async function(){
+(async function () {
   const sidebar = document.getElementById('sidebar');
   const toggle = document.getElementById('sidebarToggle');
   const searchInput = document.getElementById('searchInput');
@@ -61,14 +61,14 @@
       results.forEach(({ item, matches }, i) => {
         const el = item.element;
         el.style.display = '';
-        
+
         // Highlight matches
         let highlightedText = item.text;
         matches.forEach(m => {
           m.indices.slice().reverse().forEach(([start, end]) => {
-            highlightedText = 
-              highlightedText.slice(0, start) + 
-              '<mark>' + highlightedText.slice(start, end + 1) + '</mark>' + 
+            highlightedText =
+              highlightedText.slice(0, start) +
+              '<mark>' + highlightedText.slice(start, end + 1) + '</mark>' +
               highlightedText.slice(end + 1);
           });
         });
@@ -102,7 +102,7 @@
       });
     });
   };
-  
+
   // Initialize features when DOM is loaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -117,19 +117,19 @@
 function initAllFeatures() {
   // Initialize code copy buttons
   initCodeCopyButtons();
-  
+
   // Initialize image lightbox
   initImageLightbox();
-  
+
   // Initialize mobile TOC
   initMobileToc();
-  
+
   // Initialize recently viewed documents
   initRecentlyViewed();
-  
+
   // Initialize global search
   initGlobalSearch();
-  
+
   // Initialize keyboard navigation
   initKeyboardNavigation();
 }
@@ -143,7 +143,7 @@ function initCodeCopyButtons() {
     button.className = 'code-copy-btn';
     button.textContent = 'Copy';
     button.setAttribute('aria-label', 'Copy code to clipboard');
-    
+
     button.addEventListener('click', () => {
       const text = codeBlock.textContent;
       navigator.clipboard.writeText(text).then(() => {
@@ -155,7 +155,7 @@ function initCodeCopyButtons() {
         }, 2000);
       });
     });
-    
+
     pre.style.position = 'relative';
     pre.appendChild(button);
   });
@@ -171,20 +171,20 @@ function initImageLightbox() {
     <img class="lightbox-content" src="" alt="">
   `;
   document.body.appendChild(lightbox);
-  
+
   const closeBtn = lightbox.querySelector('.lightbox-close');
   const lightboxImg = lightbox.querySelector('.lightbox-content');
-  
+
   closeBtn.addEventListener('click', () => {
     lightbox.style.display = 'none';
   });
-  
+
   lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox) {
       lightbox.style.display = 'none';
     }
   });
-  
+
   images.forEach(img => {
     img.addEventListener('click', () => {
       lightboxImg.src = img.src;
@@ -198,17 +198,17 @@ function initImageLightbox() {
 function initMobileToc() {
   // Only on mobile devices
   if (window.innerWidth > 960) return;
-  
+
   const tocContainer = document.getElementById('toc-container');
   if (!tocContainer) return;
-  
+
   // Create mobile TOC toggle button
   const tocToggle = document.createElement('button');
   tocToggle.className = 'mobile-toc-toggle';
   tocToggle.innerHTML = '☰';
   tocToggle.setAttribute('aria-label', 'Toggle table of contents');
   document.body.appendChild(tocToggle);
-  
+
   // Create mobile TOC container
   const mobileToc = document.createElement('div');
   mobileToc.className = 'mobile-toc';
@@ -217,12 +217,12 @@ function initMobileToc() {
     ${tocContainer.innerHTML}
   `;
   document.body.appendChild(mobileToc);
-  
+
   // Toggle mobile TOC
   tocToggle.addEventListener('click', () => {
     mobileToc.classList.toggle('open');
   });
-  
+
   // Close mobile TOC when clicking outside
   document.addEventListener('click', (e) => {
     if (!tocToggle.contains(e.target) && !mobileToc.contains(e.target)) {
@@ -236,7 +236,7 @@ function initRecentlyViewed() {
   // Get current document info
   const course = document.body.dataset.course;
   const activeFile = document.body.dataset.activeFile;
-  
+
   if (course && activeFile) {
     const docInfo = {
       course: course,
@@ -245,24 +245,24 @@ function initRecentlyViewed() {
       url: window.location.href,
       timestamp: new Date().toISOString()
     };
-    
+
     // Get existing recently viewed from localStorage
     let recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-    
+
     // Remove if already exists
-    recentlyViewed = recentlyViewed.filter(item => 
+    recentlyViewed = recentlyViewed.filter(item =>
       !(item.course === docInfo.course && item.file === docInfo.file)
     );
-    
+
     // Add to beginning
     recentlyViewed.unshift(docInfo);
-    
+
     // Keep only last 10
     recentlyViewed = recentlyViewed.slice(0, 10);
-    
+
     // Save back to localStorage
     localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
-    
+
     // Display recently viewed (if on a document page)
     displayRecentlyViewed(recentlyViewed);
   }
@@ -271,46 +271,46 @@ function initRecentlyViewed() {
 function displayRecentlyViewed(recentlyViewed) {
   // Only show on document pages
   if (!document.body.dataset.course) return;
-  
+
   const contentInner = document.querySelector('.content-inner');
   if (!contentInner) return;
-  
+
   const recentlyViewedContainer = document.createElement('div');
   recentlyViewedContainer.className = 'recently-viewed';
   recentlyViewedContainer.innerHTML = `
     <div class="label">Recently Viewed</div>
     <div class="recently-viewed-list">
-      ${recentlyViewed.map(item => 
-        `<div class="recently-viewed-item">
+      ${recentlyViewed.map(item =>
+    `<div class="recently-viewed-item">
           <a href="/docs/${encodeURIComponent(item.course)}/${encodeURIComponent(item.file)}">
             ${item.file} (${item.course})
           </a>
         </div>`
-      ).join('')}
+  ).join('')}
     </div>
   `;
-  
+
   contentInner.appendChild(recentlyViewedContainer);
 }
 
 // Global search
 function initGlobalSearch() {
   const searchInputs = document.querySelectorAll('#searchInput, #heroSearch, #courseSearch');
-  
+
   searchInputs.forEach(searchInput => {
     if (!searchInput) return;
-    
+
     const resultsContainerId = searchInput.id + 'Results';
     const resultsContainer = document.getElementById(resultsContainerId);
-    
+
     if (!resultsContainer) return;
-    
+
     let searchTimeout;
-    
+
     searchInput.addEventListener('input', () => {
       clearTimeout(searchTimeout);
       const query = searchInput.value.trim();
-      
+
       if (query.length > 2) {
         // Show loading spinner
         resultsContainer.innerHTML = `
@@ -319,7 +319,7 @@ function initGlobalSearch() {
           </div>
         `;
         resultsContainer.style.display = 'block';
-        
+
         // Debounce search requests
         searchTimeout = setTimeout(() => {
           fetch(`/api/search?q=${encodeURIComponent(query)}`)
@@ -349,7 +349,7 @@ function initGlobalSearch() {
         resultsContainer.style.display = 'none';
       }
     });
-    
+
     // Hide search results when clicking outside
     document.addEventListener('click', (e) => {
       if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
@@ -365,14 +365,14 @@ function initKeyboardNavigation() {
     // Focus search with Ctrl+/
     if ((e.ctrlKey || e.metaKey) && e.key === '/') {
       e.preventDefault();
-      const searchInput = document.getElementById('searchInput') || 
-                         document.getElementById('heroSearch') || 
-                         document.getElementById('courseSearch');
+      const searchInput = document.getElementById('searchInput') ||
+        document.getElementById('heroSearch') ||
+        document.getElementById('courseSearch');
       if (searchInput) {
         searchInput.focus();
       }
     }
-    
+
     // Toggle sidebar with Ctrl+B
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
       e.preventDefault();
@@ -389,34 +389,34 @@ function initKeyboardNavigation() {
 
 // Toast notifications
 function showToast(message, type = 'info') {
-  const toastContainer = document.querySelector('.toast-container') || 
+  const toastContainer = document.querySelector('.toast-container') ||
     (() => {
       const container = document.createElement('div');
       container.className = 'toast-container';
       document.body.appendChild(container);
       return container;
     })();
-  
+
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  
+
   let icon = 'ℹ️';
   if (type === 'success') icon = '✅';
   if (type === 'error') icon = '❌';
-  
+
   toast.innerHTML = `
     <span class="toast-icon">${icon}</span>
     <div class="toast-content">${message}</div>
     <button class="toast-close">&times;</button>
   `;
-  
+
   const closeBtn = toast.querySelector('.toast-close');
   closeBtn.addEventListener('click', () => {
     toast.remove();
   });
-  
+
   toastContainer.appendChild(toast);
-  
+
   // Auto remove after 5 seconds
   setTimeout(() => {
     if (toast.parentNode) {
@@ -427,3 +427,43 @@ function showToast(message, type = 'info') {
 
 // Export for global use
 window.showToast = showToast;
+
+// Generate table of contents
+document.addEventListener('DOMContentLoaded', function () {
+  const content = document.querySelector('.doc-content');
+  if (!content) return;
+
+  const headings = content.querySelectorAll('h1, h2, h3');
+  if (headings.length < 2) return;
+
+  // Desktop TOC
+  const tocContainer = document.getElementById('toc-container');
+  if (tocContainer) {
+    const toc = document.createElement('ul');
+
+    headings.forEach((heading, index) => {
+      // Add ID to heading if it doesn't have one
+      if (!heading.id) {
+        heading.id = `heading-${index}`;
+      }
+
+      const link = document.createElement('a');
+      link.href = `#${heading.id}`;
+      link.textContent = heading.textContent;
+
+      const listItem = document.createElement('li');
+      listItem.className = `toc-${heading.tagName.toLowerCase()}`;
+      listItem.appendChild(link);
+
+      toc.appendChild(listItem);
+    });
+
+    tocContainer.appendChild(toc);
+  }
+
+  // Mobile TOC
+  const mobileTocContainer = document.getElementById('mobile-toc-container');
+  if (mobileTocContainer) {
+    mobileTocContainer.innerHTML = tocContainer ? tocContainer.innerHTML : '';
+  }
+});
