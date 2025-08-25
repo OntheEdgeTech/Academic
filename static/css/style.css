@@ -159,7 +159,7 @@ h4 {
   color: white;
   padding: 4rem 0;
   margin-bottom: 2rem;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border-radius: 0;
 }
 
 .hero-section h1 {
@@ -664,7 +664,7 @@ h4 {
   color: white;
   padding: 2.5rem 0;
   margin-bottom: 2rem;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border-radius: 0;
 }
 
 .course-header h1 {
@@ -812,19 +812,6 @@ h4 {
     margin-bottom: 1rem;
   }
   
-  .course-header {
-    padding: 1.5rem 0;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-  }
-  
-  .course-header h1 {
-    font-size: 1.75rem;
-  }
-  
-  .course-header .lead {
-    font-size: 1rem;
-  }
-  
   .course-meta {
     justify-content: center;
   }
@@ -842,21 +829,8 @@ h4 {
   
   .card-body {
     padding: 1.25rem;
-  }
-  
-  .course-header {
-    padding: 1.5rem 0;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-  }
-  
-  .course-header h1 {
-    font-size: 1.75rem;
-  }
-  
-  .course-header .lead {
-    font-size: 1rem;
-  }
-  
+  } 
+ 
   .documents-grid h2 {
     font-size: 1.5rem;
   }
