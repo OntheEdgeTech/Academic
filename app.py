@@ -412,7 +412,6 @@ def admin_course_new():
                 flash('A course with this ID already exists', 'error')
             else:
                 os.makedirs(os.path.join(course_path, 'docs'))
-                os.makedirs(os.path.join(course_path, 'media'))
                 
                 # Save course info
                 course_data = {

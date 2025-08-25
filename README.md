@@ -12,6 +12,13 @@ A Flask-based web application with an elegant, modern design for academic docume
 - Clean, academic-focused interface
 - Admin panel for content management
 
+> Admin page: /admin
+
+## Screen Snapshots
+
+![Landing Page SS](file_storage/landing.png)
+![Course Page SS](file_storage/course.png)
+
 ## Prerequisites
 
 - Python 3.7 or higher
@@ -21,20 +28,19 @@ A Flask-based web application with an elegant, modern design for academic docume
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd app
+   git clone https://github.com/OntheEdgeTech/Academic.git
    ```
 
-2. Install the required packages:
+2. Setup:
    ```bash
-   pip install --break-system-packages -r requirements.txt
+   dockero setup Academic/
    ```
 
 ## Usage
 
 1. Run the application:
    ```bash
-   python app.py
+   dockero start academic
    ```
 
 2. Open your web browser and navigate to `http://localhost:80`
@@ -68,11 +74,7 @@ courses/
 │   ├── docs/
 │   │   ├── document1.md
 │   │   ├── document2.md
-│   │   └── ...
-│   └── media/
-│       ├── image1.png
-│       ├── image2.jpg
-│       └── ...
+└── └── └── ...
 ```
 
 ### Creating a New Course (Admin Panel)
@@ -124,14 +126,6 @@ Content here...
 ## Section 2
 More content...
 ```
-
-### Adding Media to a Course
-
-1. Place images and other media files in the `media/` directory of a course
-2. Reference them in documents using relative paths:
-   ```markdown
-   ![Alt text](../media/image.png)
-   ```
 
 ## Customization
 
