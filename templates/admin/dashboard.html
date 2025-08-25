@@ -1,0 +1,156 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+</div>
+
+<div class="stats-grid">
+    <div class="admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Courses</h5>
+        </div>
+        <div class="card-body text-center">
+            <div class="stat-number">{{ total_courses }}</div>
+            <div class="stat-text">Total Courses</div>
+        </div>
+    </div>
+    
+    <div class="admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Documents</h5>
+        </div>
+        <div class="card-body text-center">
+            <div class="stat-number">{{ total_documents }}</div>
+            <div class="stat-text">Total Documents</div>
+        </div>
+    </div>
+    
+    <div class="admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Users</h5>
+        </div>
+        <div class="card-body text-center">
+            <div class="stat-number">1</div>
+            <div class="stat-text">Administrators</div>
+        </div>
+    </div>
+    
+    <div class="admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">System</h5>
+        </div>
+        <div class="card-body text-center">
+            <div class="stat-number">
+                <i class="bi bi-check-circle-fill text-success"></i>
+            </div>
+            <div class="stat-text">All Systems OK</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Courses</h5>
+            </div>
+            <div class="card-body">
+                {% if courses %}
+                    <div class="admin-table-container">
+                        <table class="admin-table admin-table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Instructor</th>
+                                    <th>Documents</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses[:5] %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ course.title }}</strong>
+                                        <div class="text-muted small">{{ course.description[:50] }}{% if course.description|length > 50 %}...{% endif %}</div>
+                                    </td>
+                                    <td>{{ course.instructor }}</td>
+                                    <td>{{ course.docs_count }}</td>
+                                    <td>
+                                        <div class="actions-cell">
+                                            <a href="{{ url_for('admin_course_view', course_id=course.id) }}" class="btn btn-admin btn-admin-primary btn-admin-sm" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('admin_course_edit', course_id=course.id) }}" class="btn btn-admin btn-admin-secondary btn-admin-sm" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-journal-x"></i>
+                        <p class="mb-0 text-muted">No courses available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="{{ url_for('admin_course_new') }}" class="btn btn-admin btn-admin-primary">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create Course</span>
+                    </a>
+                    <a href="{{ url_for('admin_courses') }}" class="btn btn-admin btn-admin-secondary">
+                        <i class="bi bi-journal"></i>
+                        <span>Manage Courses</span>
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-admin btn-admin-secondary">
+                        <i class="bi bi-house"></i>
+                        <span>View Portal</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="mb-0">System Information</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-server text-primary me-2"></i>
+                        <strong>Server:</strong> Flask
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-code-slash text-primary me-2"></i>
+                        <strong>Version:</strong> 1.0
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-database text-primary me-2"></i>
+                        <strong>Storage:</strong> File-based
+                    </li>
+                    <li>
+                        <i class="bi bi-shield-lock text-primary me-2"></i>
+                        <strong>Security:</strong> Session-based
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

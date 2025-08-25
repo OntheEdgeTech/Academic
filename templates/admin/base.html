@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} - Academic Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Top Navigation -->
+        <nav class="admin-navbar">
+            <div class="admin-navbar-top">
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-navbar-brand" id="adminNavbarBrand">
+                    <i class="bi bi-mortarboard"></i>
+                    <span class="brand-text">Academic Portal</span>
+                </a>
+                
+                <div class="admin-navbar-center">
+                    <ul class="admin-navbar-nav">
+                        <li class="nav-item">
+                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                                <i class="bi bi-speedometer2"></i>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('admin_courses') }}" class="nav-link {% if request.endpoint in ['admin_courses', 'admin_course_view', 'admin_course_new', 'admin_course_edit', 'admin_document_new', 'admin_document_edit'] %}active{% endif %}">
+                                <i class="bi bi-journal-bookmark"></i>
+                                <span class="nav-text">Courses</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('admin_file_storage') }}" class="nav-link {% if request.endpoint in ['admin_file_storage', 'admin_file_storage_upload', 'admin_file_storage_delete', 'admin_file_storage_toggle_public'] %}active{% endif %}">
+                                <i class="bi bi-folder"></i>
+                                <span class="nav-text">Files</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('index') }}" class="nav-link">
+                                <i class="bi bi-arrow-left-circle"></i>
+                                <span class="nav-text">Portal</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="admin-navbar-user">
+                    <div class="admin-user-dropdown">
+                        <div class="admin-user-trigger">
+                            <div class="admin-user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <span class="admin-username">Administrator</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="admin-user-menu">
+                            <a href="{{ url_for('admin_logout') }}" class="admin-logout-item">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Breadcrumb Navigation -->
+        {% block breadcrumb %}{% endblock %}
+        
+        <!-- Main Content -->
+        <main class="admin-main">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert admin-alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            <i class="bi bi-{% if category == 'error' %}exclamation-triangle{% elif category == 'success' %}check-circle{% else %}info{% endif %}-fill me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        // Portal redirection when Shift key is held while clicking navbar brand
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminNavbarBrand = document.querySelector('.admin-navbar-brand');
+            
+            if (adminNavbarBrand) {
+                adminNavbarBrand.addEventListener('click', function(e) {
+                    // Check if Shift key is pressed
+                    if (e.shiftKey) {
+                        e.preventDefault();
+                        // Redirect to main portal
+                        window.location.href = '{{ url_for("index") }}';
+                    }
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

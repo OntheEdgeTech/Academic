@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Portal - Course Documentation{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1>Academic Excellence Through Knowledge Sharing</h1>
+                <p class="lead">Access comprehensive course materials, research documents, and educational resources designed to support your academic journey and foster intellectual growth.</p>
+                <div class="mt-4">
+                    <a href="#courses" class="btn btn-light btn-lg me-3">Explore Courses</a>
+                    <a href="{{ url_for('search') }}" class="btn btn-outline-light btn-lg">Search Documents</a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block text-center">
+                <div class="hero-illustration">
+                    <svg width="100%" height="300" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="50" y="50" width="150" height="200" rx="10" fill="rgba(255,255,255,0.1)" />
+                        <rect x="70" y="70" width="110" height="20" rx="5" fill="rgba(255,255,255,0.2)" />
+                        <rect x="70" y="100" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="70" y="125" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="70" y="150" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="70" y="175" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="70" y="200" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        
+                        <rect x="220" y="80" width="150" height="170" rx="10" fill="rgba(255,255,255,0.1)" />
+                        <circle cx="295" cy="120" r="25" fill="rgba(255,255,255,0.2)" />
+                        <rect x="240" y="160" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="240" y="185" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="240" y="210" width="110" height="15" rx="5" fill="rgba(255,255,255,0.15)" />
+                        
+                        <rect x="390" y="100" width="60" height="150" rx="10" fill="rgba(255,255,255,0.1)" />
+                        <rect x="400" y="120" width="40" height="10" rx="3" fill="rgba(255,255,255,0.2)" />
+                        <rect x="400" y="140" width="40" height="10" rx="3" fill="rgba(255,255,255,0.2)" />
+                        <rect x="400" y="160" width="40" height="10" rx="3" fill="rgba(255,255,255,0.2)" />
+                        <rect x="400" y="180" width="40" height="10" rx="3" fill="rgba(255,255,255,0.2)" />
+                        <rect x="400" y="200" width="40" height="10" rx="3" fill="rgba(255,255,255,0.2)" />
+                        <rect x="400" y="220" width="40" height="10" rx="3" fill="rgba(255,255,255,0.2)" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="courses">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h2 class="mb-4">Academic Courses</h2>
+            <p class="text-light col-lg-8 mx-auto">Browse our collection of expertly curated course materials designed to support your academic journey.</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% if courses %}
+            {% for course in courses %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card course-card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="course-icon">
+                            <i class="bi bi-journal-bookmark"></i>
+                        </div>
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="card-text text-muted flex-grow-1">{{ course.description }}</p>
+                        <div class="course-stats">
+                            <span><i class="bi bi-person-circle me-1"></i> {{ course.instructor }}</span>
+                            <span><i class="bi bi-file-earmark-text me-1"></i> {{ course.docs_count }} documents</span>
+                        </div>
+                        <a href="{{ url_for('course', course_id=course.id) }}" class="btn btn-primary mt-3">Access Course</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No courses available at the moment. Please check back later.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

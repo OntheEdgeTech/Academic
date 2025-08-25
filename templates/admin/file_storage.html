@@ -1,0 +1,385 @@
+{% extends "admin/base.html" %}
+
+{% block title %}File Storage{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">File Storage</h1>
+</div>
+
+<div class="admin-card">
+    <div class="card-body p-0">
+        <!-- Files Grid -->
+        <div class="drive-files-section" id="filesContainer">
+            <!-- Upload Area - Simplified -->
+            <div class="simple-upload-area">
+                <form method="POST" action="{{ url_for('admin_file_storage_upload') }}" enctype="multipart/form-data" class="admin-form" id="uploadForm">
+                    <div class="upload-trigger" id="uploadTrigger">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Add files</span>
+                        <input type="file" id="fileInput" name="file" class="d-none" multiple>
+                    </div>
+                    <div class="upload-info" id="uploadInfo" style="display: none;">
+                        <div class="file-list" id="fileList"></div>
+                        <button type="submit" class="btn-admin btn-admin-primary btn-sm mt-2">
+                            <i class="bi bi-upload"></i>
+                            Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Drag and Drop Overlay -->
+            <div class="drop-overlay" id="dropOverlay">
+                <div class="drop-content">
+                    <i class="bi bi-cloud-upload drop-icon"></i>
+                    <h3>Drop files here</h3>
+                    <p>Upload files directly to your storage</p>
+                </div>
+            </div>
+            
+            <!-- File Items -->
+            <div class="files-container">
+                {% if files %}
+                <div class="files-grid">
+                    {% for file in files %}
+                    <div class="file-item" data-filename="{{ file.filename }}" data-filepath="{{ url_for('public_file', filename=file.filename) }}">
+                        <div class="file-icon-container">
+                            {% if file.filename.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')) %}
+                                <i class="bi bi-file-image file-icon-image"></i>
+                            {% elif file.filename.endswith(('.pdf',)) %}
+                                <i class="bi bi-file-pdf file-icon-pdf"></i>
+                            {% elif file.filename.endswith(('.doc', '.docx')) %}
+                                <i class="bi bi-file-word file-icon-word"></i>
+                            {% elif file.filename.endswith(('.xls', '.xlsx')) %}
+                                <i class="bi bi-file-excel file-icon-excel"></i>
+                            {% elif file.filename.endswith(('.ppt', '.pptx')) %}
+                                <i class="bi bi-file-ppt file-icon-ppt"></i>
+                            {% elif file.filename.endswith(('.zip', '.rar', '.7z', '.tar', '.gz')) %}
+                                <i class="bi bi-file-zip file-icon-zip"></i>
+                            {% elif file.filename.endswith(('.txt', '.md')) %}
+                                <i class="bi bi-file-text file-icon-text"></i>
+                            {% elif file.filename.endswith(('.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.webm')) %}
+                                <i class="bi bi-file-play file-icon-video"></i>
+                            {% elif file.filename.endswith(('.mp3', '.wav')) %}
+                                <i class="bi bi-file-music file-icon-audio"></i>
+                            {% elif file.filename.endswith(('.py', '.js', '.html', '.css', '.java', '.cpp', '.c', '.php', '.rb', '.swift', '.go', '.sql')) %}
+                                <i class="bi bi-file-code file-icon-code"></i>
+                            {% else %}
+                                <i class="bi bi-file-earmark file-icon-default"></i>
+                            {% endif %}
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name" title="{{ file.filename }}">{{ file.filename }}</div>
+                            <div class="file-meta">
+                                <span class="file-size">{{ "%.1f"|format(file.size / 1024) }} KB</span>
+                                <span class="file-date">{{ file.modified|datetime }}</span>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-action-btn" title="Preview">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <div class="file-menu">
+                                <button class="file-menu-btn" title="More options">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div class="file-dropdown">
+                                    <a href="{{ url_for('public_file', filename=file.filename) }}" target="_blank" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-up-right"></i> Open
+                                    </a>
+                                    <a href="{{ url_for('public_file', filename=file.filename) }}" download class="dropdown-item">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin_file_storage_toggle_public', filename=file.filename) }}">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi {% if file.is_public %}bi-lock{% else %}bi-unlock{% endif %}"></i>
+                                            {% if file.is_public %}Make Private{% else %}Make Public{% endif %}
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin_file_storage_delete', filename=file.filename) }}" onsubmit="return confirm('Delete this file?')">
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state drive-empty">
+                    <i class="bi bi-folder"></i>
+                    <h4>No files yet</h4>
+                    <p class="mt-2">Click the + button above or drag files anywhere on this page</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Preview Modal -->
+<div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filePreviewModalLabel">File Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="filePreviewContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadLink" class="btn-admin btn-admin-primary" download>
+                    <i class="bi bi-download"></i> Download
+                </a>
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadTrigger = document.getElementById('uploadTrigger');
+    const fileInput = document.getElementById('fileInput');
+    const uploadInfo = document.getElementById('uploadInfo');
+    const fileList = document.getElementById('fileList');
+    const filesContainer = document.getElementById('filesContainer');
+    const dropOverlay = document.getElementById('dropOverlay');
+    const directFileInput = document.getElementById('directFileInput');
+    const filePreviewModal = new bootstrap.Modal(document.getElementById('filePreviewModal'));
+    const filePreviewContent = document.getElementById('filePreviewContent');
+    const downloadLink = document.getElementById('downloadLink');
+    const modalTitle = document.getElementById('filePreviewModalLabel');
+
+    // Upload trigger click event
+    uploadTrigger.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // File input change event
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            // Clear previous file list
+            fileList.innerHTML = '';
+            
+            // Add files to list
+            for (let i = 0; i < this.files.length; i++) {
+                const file = this.files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-preview-item';
+                fileItem.innerHTML = `
+                    <span class="file-preview-name">${file.name}</span>
+                    <span class="file-preview-size">${(file.size / 1024).toFixed(1)} KB</span>
+                `;
+                fileList.appendChild(fileItem);
+            }
+            
+            // Show upload info
+            uploadInfo.style.display = 'block';
+        } else {
+            uploadInfo.style.display = 'none';
+        }
+    });
+
+    // File item click for preview
+    const fileItems = document.querySelectorAll('.file-item');
+    fileItems.forEach(item => {
+        const previewBtn = item.querySelector('.file-action-btn');
+        const menuBtn = item.querySelector('.file-menu-btn');
+        const dropdown = item.querySelector('.file-dropdown');
+        
+        // Preview button click
+        previewBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openFilePreview(item);
+        });
+        
+        // Menu button click
+        menuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+        
+        // Click anywhere to close dropdown
+        document.addEventListener('click', function() {
+            dropdown.classList.remove('show');
+        });
+    });
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        filesContainer.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        filesContainer.addEventListener(eventName, highlight, false);
+        document.body.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        filesContainer.addEventListener(eventName, unhighlight, false);
+        document.body.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropOverlay.style.display = 'flex';
+    }
+
+    function unhighlight(e) {
+        // Only hide if we're not dragging over the overlay itself
+        if (!dropOverlay.contains(e.relatedTarget)) {
+            dropOverlay.style.display = 'none';
+        }
+    }
+
+    // Handle dropped files
+    filesContainer.addEventListener('drop', handleDrop, false);
+    document.body.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            // Create FormData object
+            const formData = new FormData();
+            
+            // Add all files to formData
+            for (let i = 0; i < files.length; i++) {
+                formData.append('file', files[i]);
+            }
+            
+            // Send files via AJAX
+            fetch('{{ url_for("admin_file_storage_upload") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Upload failed. Please try again.');
+            });
+        }
+        
+        // Hide overlay
+        dropOverlay.style.display = 'none';
+    }
+
+    // Open file preview function
+    function openFilePreview(item) {
+        const filename = item.getAttribute('data-filename');
+        const filepath = item.getAttribute('data-filepath');
+        
+        // Set modal title
+        modalTitle.textContent = filename;
+        
+        // Set download link
+        downloadLink.href = filepath;
+        downloadLink.setAttribute('download', filename);
+        
+        // Determine file type and show appropriate preview
+        if (filename.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
+            // Image preview
+            filePreviewContent.innerHTML = `<img src="${filepath}" class="img-fluid" style="max-height: 70vh; margin: 0 auto; display: block;" alt="${filename}">`;
+        } else if (filename.match(/\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i)) {
+            // Video preview
+            filePreviewContent.innerHTML = `
+                <video controls style="width: 100%; max-height: 70vh; margin: 0 auto; display: block;">
+                    <source src="${filepath}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>`;
+        } else if (filename.match(/\.(mp3|wav)$/i)) {
+            // Audio preview
+            filePreviewContent.innerHTML = `
+                <audio controls style="width: 100%; margin: 0 auto; display: block;">
+                    <source src="${filepath}" type="audio/mpeg">
+                    Your browser does not support the audio tag.
+                </audio>`;
+        } else if (filename.match(/\.(txt|md|py|js|html|css|java|cpp|c|php|rb|swift|go|sql|json|xml|yml|yaml)$/i)) {
+            // Text file preview - fetch content
+            filePreviewContent.innerHTML = '<p>Loading file content...</p>';
+            fetch(filepath)
+                .then(response => response.text())
+                .then(text => {
+                    // Escape HTML to prevent XSS
+                    const escapedText = text.replace(/&/g, '&amp;')
+                                           .replace(/</g, '&lt;')
+                                           .replace(/>/g, '&gt;')
+                                           .replace(/"/g, '&quot;')
+                                           .replace(/'/g, '&#039;');
+                    
+                    // Determine language for syntax highlighting
+                    let language = 'plaintext';
+                    if (filename.match(/\.py$/i)) language = 'python';
+                    else if (filename.match(/\.js$/i)) language = 'javascript';
+                    else if (filename.match(/\.html$/i)) language = 'html';
+                    else if (filename.match(/\.css$/i)) language = 'css';
+                    else if (filename.match(/\.java$/i)) language = 'java';
+                    else if (filename.match(/\.cpp$/i)) language = 'cpp';
+                    else if (filename.match(/\.c$/i)) language = 'c';
+                    else if (filename.match(/\.php$/i)) language = 'php';
+                    else if (filename.match(/\.rb$/i)) language = 'ruby';
+                    else if (filename.match(/\.swift$/i)) language = 'swift';
+                    else if (filename.match(/\.go$/i)) language = 'go';
+                    else if (filename.match(/\.sql$/i)) language = 'sql';
+                    else if (filename.match(/\.json$/i)) language = 'json';
+                    else if (filename.match(/\.xml$/i)) language = 'xml';
+                    else if (filename.match(/\.ya?ml$/i)) language = 'yaml';
+                    else if (filename.match(/\.md$/i)) language = 'markdown';
+                    
+                    filePreviewContent.innerHTML = `<pre><code class="language-${language}">${escapedText}</code></pre>`;
+                    
+                    // Apply syntax highlighting
+                    setTimeout(() => {
+                        document.querySelectorAll('pre code').forEach((block) => {
+                            hljs.highlightElement(block);
+                        });
+                    }, 10);
+                })
+                .catch(() => {
+                    filePreviewContent.innerHTML = `<p>Unable to load file content. <a href="${filepath}" target="_blank">Click here to view directly</a>.</p>`;
+                });
+        } else if (filename.match(/\.pdf$/i)) {
+            // PDF preview
+            filePreviewContent.innerHTML = `<iframe src="${filepath}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+        } else {
+            // Default preview for other file types
+            filePreviewContent.innerHTML = `
+                <div class="text-center">
+                    <i class="bi bi-file-earmark" style="font-size: 5rem; color: #cbd5e8;"></i>
+                    <h4>${filename}</h4>
+                    <p>This file type cannot be previewed directly.</p>
+                    <a href="${filepath}" target="_blank" class="btn-admin btn-admin-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+                    </a>
+                </div>`;
+        }
+        
+        // Show modal
+        filePreviewModal.show();
+    }
+});
+</script>
+{% endblock %}

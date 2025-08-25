@@ -1,0 +1,85 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if course %}Edit Course{% else %}New Course{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="admin-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_courses') }}">Courses</a></li>
+        {% if course %}
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_course_view', course_id=course.id) }}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        {% else %}
+            <li class="breadcrumb-item active" aria-current="page">New Course</li>
+        {% endif %}
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="mb-0">{% if course %}Edit Course{% else %}Create New Course{% endif %}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" class="admin-form">
+            {% if not course %}
+            <div class="mb-3">
+                <label for="course_id" class="form-label">Course ID</label>
+                <input type="text" class="form-control" id="course_id" name="course_id" 
+                       placeholder="e.g., computer_science_fundamentals" required>
+                <div class="form-text">Used in URLs. Lowercase letters, numbers, and underscores only.</div>
+            </div>
+            {% endif %}
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">Course Title</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                       value="{{ course.title if course else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ course.description if course else '' }}</textarea>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="instructor" class="form-label">Instructor</label>
+                        <input type="text" class="form-control" id="instructor" name="instructor" 
+                               value="{{ course.instructor if course else '' }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="level" class="form-label">Level</label>
+                        <select class="form-select" id="level" name="level">
+                            <option value="">Select level</option>
+                            <option value="Beginner" {% if course and course.level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                            <option value="Intermediate" {% if course and course.level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="Advanced" {% if course and course.level == 'Advanced' %}selected{% endif %}>Advanced</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="duration" class="form-label">Duration</label>
+                <input type="text" class="form-control" id="duration" name="duration" 
+                       value="{{ course.duration if course else '' }}" placeholder="e.g., 12 weeks, 6 months">
+            </div>
+            
+            <div class="mt-4 d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-admin btn-admin-primary">
+                    {% if course %}<i class="bi bi-save"></i>Update Course{% else %}<i class="bi bi-plus-circle"></i>Create Course{% endif %}
+                </button>
+                <a href="{{ url_for('admin_courses') }}" class="btn btn-admin btn-admin-secondary">
+                    <i class="bi bi-x-circle"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

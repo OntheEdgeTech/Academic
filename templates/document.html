@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block title %}{{ doc.title }} - {{ course.title }} - Academic Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+<style>
+    .document-layout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 200px);
+    }
+    
+    .document-sidebar {
+        flex: 0 0 250px;
+        align-self: flex-start;
+        position: sticky;
+        top: 2rem;
+    }
+    
+    .document-main-content {
+        flex: 1;
+        min-width: 0;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .document-sidebar-right {
+        flex: 0 0 250px;
+        align-self: flex-start;
+        position: sticky;
+        top: 2rem;
+    }
+    
+    @media (max-width: 1200px) {
+        .document-sidebar, .document-sidebar-right {
+            flex: 0 0 200px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .document-sidebar, .document-sidebar-right {
+            flex: 0 0 100%;
+            position: static;
+            top: auto;
+            order: 2;
+            margin-top: 2rem;
+        }
+        
+        .document-main-content {
+            order: 1;
+        }
+        
+        .document-sidebar-right {
+            order: 3;
+        }
+    }
+    
+    .sidebar-panel {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .sidebar-panel h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--light);
+        color: var(--primary-800);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .toc-nav {
+        max-height: 40vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+    
+    .documents-nav {
+        max-height: 40vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+    
+    /* Custom scrollbar for sidebars */
+    .toc-nav::-webkit-scrollbar, .documents-nav::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .toc-nav::-webkit-scrollbar-track, .documents-nav::-webkit-scrollbar-track {
+        background: var(--lighter);
+        border-radius: 3px;
+    }
+    
+    .toc-nav::-webkit-scrollbar-thumb, .documents-nav::-webkit-scrollbar-thumb {
+        background: var(--primary-600);
+        border-radius: 3px;
+    }
+    
+    /* Table of Contents styling */
+    .toc-nav ul {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .toc-nav ul ul {
+        padding-left: 1rem;
+    }
+    
+    .toc-nav li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .toc-nav a {
+        display: block;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+        border-radius: var(--radius-sm);
+        color: var(--dark);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .toc-nav a:hover {
+        background-color: var(--primary-100);
+        color: var(--primary-800);
+        text-decoration: none;
+    }
+    
+    .toc-nav a.active {
+        background-color: var(--primary-700);
+        color: white;
+    }
+    
+    /* Documents list styling */
+    .documents-nav .list-group {
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .documents-nav .list-group-item {
+        border: none;
+        border-bottom: 1px solid var(--light);
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        color: var(--dark);
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+    
+    .documents-nav .list-group-item:last-child {
+        border-bottom: none;
+    }
+    
+    .documents-nav .list-group-item:hover {
+        background-color: var(--primary-100);
+        color: var(--primary-800);
+    }
+    
+    .documents-nav .list-group-item.active {
+        background-color: var(--primary-700);
+        color: white;
+        position: relative;
+    }
+    
+    .documents-nav .list-group-item.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: var(--accent-green);
+    }
+    
+    .document-pagination {
+        border-top: 1px solid var(--light);
+        padding-top: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .document-pagination .btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .document-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--light);
+        font-size: 0.9rem;
+        color: var(--medium);
+    }
+    
+    .document-meta .btn {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Progress bar styling */
+    .reading-progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-700), var(--primary-600));
+        z-index: 1000;
+        transition: width 0.1s ease;
+    }
+    
+    /* Back to top button */
+    .back-to-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-700);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        box-shadow: var(--shadow-md);
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        z-index: 999;
+        border: none;
+    }
+    
+    .back-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .back-to-top:hover {
+        background-color: var(--primary-800);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Reading progress bar -->
+<div class="reading-progress-bar" id="readingProgressBar"></div>
+
+<!-- Back to top button -->
+<button class="back-to-top" id="backToTopBtn" title="Back to Top">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+<div class="container-fluid">
+    <div class="document-layout">
+        <!-- Left Sidebar - Table of Contents -->
+        {% if doc.toc %}
+        <div class="document-sidebar">
+            <div class="sidebar-panel">
+                <h3><i class="bi bi-list me-2"></i> Contents</h3>
+                <div class="toc-nav">
+                    {{ doc.toc|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Main Content -->
+        <div class="document-main-content">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Courses</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('course', course_id=course.id) }}">{{ course.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ doc.title }}</li>
+                </ol>
+            </nav>
+            
+            <div class="document-meta">
+                <div>
+                    <span class="me-3"><i class="bi bi-journal-text me-1"></i> {{ doc.title }}</span>
+                </div>
+                <div>
+                    <a href="{{ url_for('course', course_id=course.id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left-circle me-1"></i> Back to Course
+                    </a>
+                </div>
+            </div>
+            
+            <article class="document-content" role="main">
+                {{ doc.content|safe }}
+            </article>
+            
+            {% if docs|length > 1 %}
+            <div class="document-pagination">
+                <div class="d-flex justify-content-between">
+                    {% set current_index = namespace(value=-1) %}
+                    {% for i in range(docs|length) %}
+                        {% if docs[i].filename == filename %}
+                            {% set current_index.value = i %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if current_index.value > 0 %}
+                    {% set prev_doc = docs[current_index.value - 1] %}
+                    <a href="{{ url_for('course_document', course_id=course.id, filename=prev_doc.filename) }}" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i> {{ prev_doc.title }}
+                    </a>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                    
+                    {% if current_index.value < docs|length - 1 and current_index.value >= 0 %}
+                    {% set next_doc = docs[current_index.value + 1] %}
+                    <a href="{{ url_for('course_document', course_id=course.id, filename=next_doc.filename) }}" 
+                       class="btn btn-primary">
+                        {{ next_doc.title }} <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Sidebar - Documents List -->
+        <div class="document-sidebar-right">
+            <div class="sidebar-panel">
+                <h3><i class="bi bi-collection me-2"></i> Documents</h3>
+                <div class="documents-nav">
+                    <div class="list-group list-group-flush">
+                        {% for doc_item in docs %}
+                        <a href="{{ url_for('course_document', course_id=course.id, filename=doc_item.filename) }}" 
+                           class="list-group-item list-group-item-action {% if doc_item.filename == filename %}active{% endif %}">
+                            {{ doc_item.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scrolling for TOC links
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add smooth scrolling to TOC links
+        const tocLinks = document.querySelectorAll('.toc-nav a');
+        tocLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }
+            });
+        });
+        
+        // Highlight active TOC item on scroll
+        const headers = document.querySelectorAll('.document-content h1, .document-content h2, .document-content h3');
+        const tocItems = document.querySelectorAll('.toc-nav a');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Remove active class from all TOC items
+                    tocItems.forEach(item => item.classList.remove('active'));
+                    
+                    // Add active class to corresponding TOC item
+                    const id = entry.target.getAttribute('id');
+                    if (id) {
+                        const tocLink = document.querySelector(`.toc-nav a[href="#${id}"]`);
+                        if (tocLink) {
+                            tocLink.classList.add('active');
+                        }
+                    }
+                }
+            });
+        }, {
+            rootMargin: '-20% 0% -80% 0%'
+        });
+        
+        headers.forEach(header => observer.observe(header));
+        
+        // Reading progress bar
+        const progressBar = document.getElementById('readingProgressBar');
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        
+        window.addEventListener('scroll', function() {
+            // Calculate reading progress
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const documentHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / documentHeight) * 100;
+            
+            // Update progress bar width
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+            
+            // Show/hide back to top button
+            if (backToTopBtn) {
+                if (scrollTop > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            }
+        });
+        
+        // Back to top button click handler
+        if (backToTopBtn) {
+            backToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Academic Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Courses</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Search Results</li>
+                </ol>
+            </nav>
+            
+            <div class="search-results">
+                <h2><i class="bi bi-search me-2"></i>Search Results</h2>
+                
+                {% if query %}
+                <p class="lead">Results for: <strong>"{{ query }}"</strong></p>
+                {% endif %}
+                
+                {% if results %}
+                    <p class="text-muted mb-4">{{ results|length }} document{% if results|length != 1 %}s{% endif %} found</p>
+                    
+                    {% for result in results %}
+                        <div class="search-result-item">
+                            <h5>
+                                <a href="{{ url_for('course_document', course_id=result.course_id, filename=result.filename) }}">
+                                    {{ result.title }}
+                                </a>
+                            </h5>
+                            <p class="course-name">
+                                <i class="bi bi-journal me-1"></i>
+                                {{ result.course_title }}
+                            </p>
+                            <p>{{ result.snippet|safe }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        {% if query %}
+                            No documents found matching your search query <strong>"{{ query }}"</strong>. 
+                            Please try different keywords or browse our courses.
+                        {% else %}
+                            Please enter a search term to find documents.
+                        {% endif %}
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">Browse All Courses</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="sidebar">
+                <h3><i class="bi bi-collection me-2"></i>All Courses</h3>
+                {% if courses %}
+                    <div class="list-group list-group-flush">
+                        {% for course in courses %}
+                            <a href="{{ url_for('course', course_id=course.id) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <i class="bi bi-journal me-2"></i>
+                                <span>{{ course.title }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No courses available.</p>
+                {% endif %}
+            </div>
+            
+            <div class="sidebar">
+                <h3><i class="bi bi-lightbulb me-2"></i>Search Tips</h3>
+                <ul class="list-unstyled text-muted">
+                    <li class="mb-2"><i class="bi bi-chevron-right me-2"></i> Use specific terms</li>
+                    <li class="mb-2"><i class="bi bi-chevron-right me-2"></i> Try related keywords</li>
+                    <li class="mb-2"><i class="bi bi-chevron-right me-2"></i> Search by topic or concept</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

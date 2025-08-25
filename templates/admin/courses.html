@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Courses Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Courses Management</h1>
+    <a href="{{ url_for('admin_course_new') }}" class="btn btn-admin btn-admin-primary">
+        <i class="bi bi-plus-circle"></i>
+        <span>New Course</span>
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="mb-0">All Courses</h5>
+    </div>
+    <div class="card-body">
+        {% if courses %}
+            <div class="admin-table-container">
+                <table class="admin-table admin-table-hover">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Instructor</th>
+                            <th>Level</th>
+                            <th>Duration</th>
+                            <th>Documents</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td>
+                                <strong>{{ course.title }}</strong>
+                                <div class="text-muted small">{{ course.description[:60] }}{% if course.description|length > 60 %}...{% endif %}</div>
+                            </td>
+                            <td>{{ course.instructor }}</td>
+                            <td>
+                                {% if course.level %}
+                                    <span class="badge bg-primary">{{ course.level }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if course.duration %}
+                                    {{ course.duration }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ course.docs_count }}</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="{{ url_for('admin_course_view', course_id=course.id) }}" class="btn btn-admin btn-admin-primary btn-admin-sm" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin_course_edit', course_id=course.id) }}" class="btn btn-admin btn-admin-secondary btn-admin-sm" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-journal-x"></i>
+                <h4>No courses found</h4>
+                <p>Create your first course to get started</p>
+                <a href="{{ url_for('admin_course_new') }}" class="btn btn-admin btn-admin-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Create New Course</span>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

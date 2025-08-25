@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if document %}Edit Document{% else %}New Document{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="admin-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_courses') }}">Courses</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_course_view', course_id=course_id) }}">Course</a></li>
+        {% if document %}
+            <li class="breadcrumb-item active" aria-current="page">Edit Document</li>
+        {% else %}
+            <li class="breadcrumb-item active" aria-current="page">New Document</li>
+        {% endif %}
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="mb-0">{% if document %}Edit Document{% else %}Create New Document{% endif %}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" class="admin-form">
+            <div class="mb-3">
+                <label for="title" class="form-label">Document Title</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                       value="{{ document.title if document else '' }}" required>
+                <div class="form-text">This will be used as the document heading and filename.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <textarea class="form-control" id="content" name="content" rows="20">{{ document.content if document else '' }}</textarea>
+                <div class="form-text">
+                    Use <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank">Markdown</a> for formatting. 
+                    The first line starting with # will be used as the document title if not specified above.
+                </div>
+            </div>
+            
+            <div class="mt-4 d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-admin btn-admin-primary">
+                    {% if document %}<i class="bi bi-save"></i>Update Document{% else %}<i class="bi bi-plus-circle"></i>Create Document{% endif %}
+                </button>
+                <a href="{{ url_for('admin_course_view', course_id=course_id) }}" class="btn btn-admin btn-admin-secondary">
+                    <i class="bi bi-x-circle"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Simple Markdown helper
+document.addEventListener('DOMContentLoaded', function() {
+    const contentTextarea = document.getElementById('content');
+    if (contentTextarea) {
+        // Add some basic formatting helpers
+        contentTextarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                
+                // Insert 4 spaces at cursor position
+                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                
+                // Move cursor to after the inserted spaces
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

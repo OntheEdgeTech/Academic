@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - Academic Portal{% endblock %}
+
+{% block content %}
+<div class="course-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto text-center">
+                <h1>{{ course.title }}</h1>
+                <p class="lead">{{ course.description }}</p>
+                <div class="course-meta justify-content-center">
+                    <div class="course-meta-item">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ course.instructor }}</span>
+                    </div>
+                    {% if course.duration %}
+                    <div class="course-meta-item">
+                        <i class="bi bi-clock"></i>
+                        <span>{{ course.duration }}</span>
+                    </div>
+                    {% endif %}
+                    {% if course.level %}
+                    <div class="course-meta-item">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>{{ course.level }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            {% if docs %}
+                <div class="documents-grid">
+                    <h2 class="mb-4">Course Documents</h2>
+                    <div class="row g-4">
+                        {% for doc in docs %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="document-card">
+                                <div class="document-card-body">
+                                    <div class="document-icon">
+                                        <i class="bi bi-file-text"></i>
+                                    </div>
+                                    <h5 class="document-title">{{ doc.title }}</h5>
+                                    <a href="{{ url_for('course_document', course_id=course.id, filename=doc.filename) }}" 
+                                       class="btn-document">View Document</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-file-earmark-x"></i>
+                    <h4>No Documents Available</h4>
+                    <p>This course doesn't have any documents yet. Please check back later.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
