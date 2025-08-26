@@ -11,6 +11,7 @@
   /* Academic Accent */
   --accent-green: #10b981;   /* Emerald - Success, Growth */
   --accent-amber: #f59e0b;   /* Amber - Warnings, Highlights */
+  --accent-red: #ef4444;     /* Red - Advanced Level */
   
   /* Neutrals for Readability */
   --lightest: #f8fafc;       /* Background */
@@ -28,6 +29,38 @@
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-900), var(--primary-800));
+  color: white;
+}
+
+.hero-section a {
+  border-radius: 50px;
+}
+
+/* Course Cards */
+.course-card {
+  transition: var(--transition);
+  border-radius: var(--radius-md);
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Stats Cards */
+.card {
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Base Styles - Focus on Readability */

@@ -3,82 +3,154 @@
 {% block title %}Search Results - Academic Portal{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-4">
     <div class="row">
         <div class="col-lg-8">
+            <!-- Breadcrumb -->
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Courses</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Search Results</li>
                 </ol>
             </nav>
             
-            <div class="search-results">
-                <h2><i class="bi bi-search me-2"></i>Search Results</h2>
-                
+            <!-- Search Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0"><i class="bi bi-search me-2"></i>Search Results</h2>
                 {% if query %}
-                <p class="lead">Results for: <strong>"{{ query }}"</strong></p>
-                {% endif %}
-                
-                {% if results %}
-                    <p class="text-muted mb-4">{{ results|length }} document{% if results|length != 1 %}s{% endif %} found</p>
-                    
-                    {% for result in results %}
-                        <div class="search-result-item">
-                            <h5>
-                                <a href="{{ url_for('course_document', course_id=result.course_id, filename=result.filename) }}">
-                                    {{ result.title }}
-                                </a>
-                            </h5>
-                            <p class="course-name">
-                                <i class="bi bi-journal me-1"></i>
-                                {{ result.course_title }}
-                            </p>
-                            <p>{{ result.snippet|safe }}</p>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        {% if query %}
-                            No documents found matching your search query <strong>"{{ query }}"</strong>. 
-                            Please try different keywords or browse our courses.
-                        {% else %}
-                            Please enter a search term to find documents.
-                        {% endif %}
-                    </div>
-                    
-                    <div class="text-center mt-4">
-                        <a href="{{ url_for('index') }}" class="btn btn-primary">Browse All Courses</a>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <div class="col-lg-4">
-            <div class="sidebar">
-                <h3><i class="bi bi-collection me-2"></i>All Courses</h3>
-                {% if courses %}
-                    <div class="list-group list-group-flush">
-                        {% for course in courses %}
-                            <a href="{{ url_for('course', course_id=course.id) }}" class="list-group-item list-group-item-action d-flex align-items-center">
-                                <i class="bi bi-journal me-2"></i>
-                                <span>{{ course.title }}</span>
-                            </a>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-muted">No courses available.</p>
+                <div class="bg-primary bg-opacity-10 px-3 py-1 rounded-pill">
+                    <span class="text-primary fw-bold">{{ results|length }}</span> 
+                    <span class="text-muted">result{% if results|length != 1 %}s{% endif %}</span>
+                </div>
                 {% endif %}
             </div>
             
-            <div class="sidebar">
-                <h3><i class="bi bi-lightbulb me-2"></i>Search Tips</h3>
-                <ul class="list-unstyled text-muted">
-                    <li class="mb-2"><i class="bi bi-chevron-right me-2"></i> Use specific terms</li>
-                    <li class="mb-2"><i class="bi bi-chevron-right me-2"></i> Try related keywords</li>
-                    <li class="mb-2"><i class="bi bi-chevron-right me-2"></i> Search by topic or concept</li>
-                </ul>
+            {% if query %}
+            <div class="mb-4">
+                <p class="lead mb-0">Results for: <span class="bg-warning bg-opacity-25 px-2 py-1 rounded">{{ query }}</span></p>
+            </div>
+            {% endif %}
+            
+            <!-- Search Results -->
+            {% if results %}
+                <div class="search-results-container">
+                    {% for result in results %}
+                        <div class="card border-0 shadow-sm mb-4 search-result-card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-2">
+                                    <a href="{{ url_for('course_document', course_id=result.course_id, filename=result.filename) }}" 
+                                       class="text-decoration-none">
+                                        {{ result.title }}
+                                    </a>
+                                </h5>
+                                <div class="d-flex align-items-center text-muted mb-3">
+                                    <i class="bi bi-journal-bookmark me-1"></i>
+                                    <span class="fw-medium">{{ result.course_title }}</span>
+                                </div>
+                                <p class="card-text mb-0">{{ result.snippet|safe }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-4">
+                            <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                        </div>
+                        <h4 class="mb-3">No Results Found</h4>
+                        <p class="mb-4 text-muted">
+                            {% if query %}
+                                We couldn't find any documents matching your search for <strong>"{{ query }}"</strong>. 
+                                Try different keywords or browse our courses.
+                            {% else %}
+                                Please enter a search term to find documents.
+                            {% endif %}
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                <i class="bi bi-collection me-2"></i>Browse Courses
+                            </a>
+                            <button class="btn btn-outline-primary" onclick="history.back()">
+                                <i class="bi bi-arrow-left me-2"></i>Go Back
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Popular Courses -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h3 class="card-title mb-0 h5">
+                        <i class="bi bi-collection me-2 text-primary"></i>Popular Courses
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        <div class="list-group list-group-flush">
+                            {% for course in courses[:5] %}
+                                <a href="{{ url_for('course', course_id=course.id) }}" 
+                                   class="list-group-item list-group-item-action border-0 px-0 py-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="bi bi-journal text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">{{ course.title }}</div>
+                                            <small class="text-muted">{{ course.docs_count }} documents</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No courses available.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Search Tips -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h3 class="card-title mb-0 h5">
+                        <i class="bi bi-lightbulb me-2 text-warning"></i>Search Tips
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
+                                <div>
+                                    <div class="fw-medium">Use specific terms</div>
+                                    <small class="text-muted">More specific keywords yield better results</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
+                                <div>
+                                    <div class="fw-medium">Try related keywords</div>
+                                    <small class="text-muted">Think of synonyms or related concepts</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
+                                <div>
+                                    <div class="fw-medium">Search by topic</div>
+                                    <small class="text-muted">Look for broader subject areas</small>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

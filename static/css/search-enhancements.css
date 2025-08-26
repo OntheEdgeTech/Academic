@@ -1,0 +1,25 @@
+/* Search Results - Enhanced */
+.search-results-container {
+  margin-bottom: 2rem;
+}
+
+.search-result-card {
+  transition: var(--transition);
+  border-left: 3px solid var(--primary-700);
+  margin-bottom: 1.5rem;
+}
+
+.search-result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.search-result-card .card-title a {
+  color: var(--darker);
+  transition: var(--transition);
+}
+
+.search-result-card .card-title a:hover {
+  color: var(--primary-700);
+  text-decoration: none;
+}

@@ -35,6 +35,34 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
+            <!-- Progress Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Your Progress</h5>
+                        <div class="text-muted">
+                            <span id="progress-text">{{ completed_docs }}/{{ docs|length }} documents</span>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar" 
+                             role="progressbar" 
+                             style="width: {% if docs|length > 0 %}{{ (completed_docs / docs|length * 100)|int }}%{% else %}0%{% endif %};" 
+                             aria-valuenow="{{ completed_docs }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="{{ docs|length }}">
+                        </div>
+                    </div>
+                    <div class="mt-2 text-muted small">
+                        {% if docs|length > 0 %}
+                            {{ (completed_docs / docs|length * 100)|int }}% complete
+                        {% else %}
+                            No documents available
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
             {% if docs %}
                 <div class="documents-grid">
                     <h2 class="mb-4">Course Documents</h2>

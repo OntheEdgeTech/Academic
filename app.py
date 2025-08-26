@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, render_template, request, abort, redirect, url_for, session, flash, send_from_directory, make_response, jsonify
 import os
 import markdown
 import re
@@ -171,6 +171,40 @@ def is_logged_in():
     """Check if user is logged in as admin"""
     return session.get('admin_logged_in', False)
 
+def get_user_progress(course_id):
+    """Get user's progress for a specific course from cookies"""
+    progress_key = f"course_progress_{course_id}"
+    progress_data = request.cookies.get(progress_key, "{}")
+    try:
+        return json.loads(progress_data)
+    except:
+        return {}
+
+def set_user_progress(course_id, doc_filename):
+    """Add a document to user's progress for a course"""
+    progress_key = f"course_progress_{course_id}"
+    progress = get_user_progress(course_id)
+    if doc_filename not in progress:
+        progress[doc_filename] = True
+    return progress
+
+def get_user_progress(course_id):
+    """Get user's progress for a specific course from cookies"""
+    progress_key = f"course_progress_{course_id}"
+    progress_data = request.cookies.get(progress_key, "{}")
+    try:
+        return json.loads(progress_data)
+    except:
+        return {}
+
+def set_user_progress(course_id, doc_filename):
+    """Add a document to user's progress for a course"""
+    progress_key = f"course_progress_{course_id}"
+    progress = get_user_progress(course_id)
+    if doc_filename not in progress:
+        progress[doc_filename] = True
+    return progress
+
 @app.route('/')
 def index():
     courses = get_courses_list()
@@ -205,7 +239,12 @@ def course(course_id):
             pass
     
     docs = get_course_docs(course_id)
-    return render_template('course.html', course=course_info, docs=docs)
+    
+    # Get user progress for this course
+    user_progress = get_user_progress(course_id)
+    completed_docs = len(user_progress)
+    
+    return render_template('course.html', course=course_info, docs=docs, completed_docs=completed_docs)
 
 @app.route('/course/<course_id>/document/<filename>')
 def course_document(course_id, filename):
@@ -239,7 +278,15 @@ def course_document(course_id, filename):
         except:
             pass
     
-    return render_template('document.html', course=course_info, doc=doc_data, docs=docs, filename=filename)
+    # Update user progress
+    response = make_response(render_template('document.html', course=course_info, doc=doc_data, docs=docs, filename=filename))
+    
+    # Set cookie to track progress
+    progress = set_user_progress(course_id, filename)
+    progress_key = f"course_progress_{course_id}"
+    response.set_cookie(progress_key, json.dumps(progress), max_age=30*24*60*60)  # 30 days
+    
+    return response
 
 @app.route('/search')
 def search():
@@ -737,16 +784,22 @@ def get_file_storage_files():
                 })
     return sorted(files, key=lambda x: x['modified'], reverse=True)
 
-def set_file_public(filename, is_public):
-    """Set file public access flag"""
-    flag_path = os.path.join(FILE_STORAGE_FOLDER, f"{filename}.public")
-    if is_public:
-        # Create empty flag file
-        open(flag_path, 'w').close()
-    else:
-        # Remove flag file if exists
-        if os.path.exists(flag_path):
-            os.remove(flag_path)
+@app.route('/api/user-progress')
+def api_user_progress():
+    """API endpoint to get user's progress for all courses"""
+    courses = get_courses_list()
+    progress_data = {}
+    
+    for course in courses:
+        user_progress = get_user_progress(course['id'])
+        completed_docs = len(user_progress)
+        progress_data[course['id']] = {
+            'completed': completed_docs,
+            'total': course['docs_count'],
+            'percentage': int((completed_docs / course['docs_count'] * 100)) if course['docs_count'] > 0 else 0
+        }
+    
+    return jsonify(progress_data)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
