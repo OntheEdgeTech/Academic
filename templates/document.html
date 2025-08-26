@@ -58,25 +58,6 @@
         }
     }
     
-    .sidebar-panel {
-        background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .sidebar-panel h3 {
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--light);
-        color: var(--primary-800);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
     .toc-nav {
         max-height: 40vh;
         overflow-y: auto;
@@ -133,7 +114,7 @@
         background-color: var(--primary-100);
         color: var(--primary-800);
         text-decoration: none;
-    }
+n    }
     
     .toc-nav a.active {
         background-color: var(--primary-700);
@@ -210,54 +191,6 @@
         padding: 0.35rem 0.75rem;
         font-size: 0.9rem;
     }
-    
-    /* Progress bar styling */
-    .reading-progress-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 0%;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-700), var(--primary-600));
-        z-index: 1000;
-        transition: width 0.1s ease;
-    }
-    
-    /* Back to top button */
-    .back-to-top {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        width: 50px;
-        height: 50px;
-        background-color: var(--primary-700);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        box-shadow: var(--shadow-md);
-        cursor: pointer;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(20px);
-        transition: all 0.3s ease;
-        z-index: 999;
-        border: none;
-    }
-    
-    .back-to-top.visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-    
-    .back-to-top:hover {
-        background-color: var(--primary-800);
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-lg);
-    }
 </style>
 {% endblock %}
 
@@ -288,8 +221,8 @@
         <div class="document-main-content">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Courses</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('course', course_id=course.id) }}">{{ course.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Courses</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.course', course_id=course.id) }}">{{ course.title }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ doc.title }}</li>
                 </ol>
             </nav>
@@ -299,7 +232,7 @@
                     <span class="me-3"><i class="bi bi-journal-text me-1"></i> {{ doc.title }}</span>
                 </div>
                 <div>
-                    <a href="{{ url_for('course', course_id=course.id) }}" class="btn btn-outline-primary">
+                    <a href="{{ url_for('main.course', course_id=course.id) }}" class="btn btn-outline-primary">
                         <i class="bi bi-arrow-left-circle me-1"></i> Back to Course
                     </a>
                 </div>
@@ -321,7 +254,7 @@
                     
                     {% if current_index.value > 0 %}
                     {% set prev_doc = docs[current_index.value - 1] %}
-                    <a href="{{ url_for('course_document', course_id=course.id, filename=prev_doc.filename) }}" 
+                    <a href="{{ url_for('main.course_document', course_id=course.id, filename=prev_doc.filename) }}" 
                        class="btn btn-outline-primary">
                         <i class="bi bi-arrow-left me-1"></i> {{ prev_doc.title }}
                     </a>
@@ -331,7 +264,7 @@
                     
                     {% if current_index.value < docs|length - 1 and current_index.value >= 0 %}
                     {% set next_doc = docs[current_index.value + 1] %}
-                    <a href="{{ url_for('course_document', course_id=course.id, filename=next_doc.filename) }}" 
+                    <a href="{{ url_for('main.course_document', course_id=course.id, filename=next_doc.filename) }}" 
                        class="btn btn-primary">
                         {{ next_doc.title }} <i class="bi bi-arrow-right ms-1"></i>
                     </a>
@@ -350,7 +283,7 @@
                 <div class="documents-nav">
                     <div class="list-group list-group-flush">
                         {% for doc_item in docs %}
-                        <a href="{{ url_for('course_document', course_id=course.id, filename=doc_item.filename) }}" 
+                        <a href="{{ url_for('main.course_document', course_id=course.id, filename=doc_item.filename) }}" 
                            class="list-group-item list-group-item-action {% if doc_item.filename == filename %}active{% endif %}">
                             {{ doc_item.title }}
                         </a>

@@ -9,7 +9,7 @@
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Search Results</li>
                 </ol>
             </nav>
@@ -38,7 +38,7 @@
                         <div class="card border-0 shadow-sm mb-4 search-result-card">
                             <div class="card-body">
                                 <h5 class="card-title mb-2">
-                                    <a href="{{ url_for('course_document', course_id=result.course_id, filename=result.filename) }}" 
+                                    <a href="{{ url_for('main.course_document', course_id=result.course_id, filename=result.filename) }}" 
                                        class="text-decoration-none">
                                         {{ result.title }}
                                     </a>
@@ -68,7 +68,7 @@
                             {% endif %}
                         </p>
                         <div class="d-flex justify-content-center gap-3">
-                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
                                 <i class="bi bi-collection me-2"></i>Browse Courses
                             </a>
                             <button class="btn btn-outline-primary" onclick="history.back()">
@@ -93,7 +93,7 @@
                     {% if courses %}
                         <div class="list-group list-group-flush">
                             {% for course in courses[:5] %}
-                                <a href="{{ url_for('course', course_id=course.id) }}" 
+                                <a href="{{ url_for('main.course', course_id=course.id) }}" 
                                    class="list-group-item list-group-item-action border-0 px-0 py-2">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">

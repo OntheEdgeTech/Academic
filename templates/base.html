@@ -17,7 +17,7 @@
 <body>
     <nav class="navbar navbar-expand-lg" role="navigation" aria-label="Main navigation">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}" aria-label="Academic Portal Home" id="navbarBrand">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}" aria-label="Academic Portal Home" id="navbarBrand">
                 <i class="bi bi-mortarboard me-2" role="img" aria-label="Graduation Cap"></i>
                 <span class="brand-text">Academic</span>
             </a>
@@ -28,10 +28,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link{% if request.endpoint == 'index' %} active{% endif %}" href="{{ url_for('index') }}">Courses</a>
+                        <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}">Courses</a>
                     </li>
                     <li class="nav-item">
-                        <form class="d-flex nav-search" role="search" action="{{ url_for('search') }}" method="GET">
+                        <form class="d-flex nav-search" role="search" action="{{ url_for('main.search') }}" method="GET">
                             <div class="input-group">
                                 <input type="text" class="form-control search-input" name="q" placeholder="Search courses & documents..." 
                                     aria-label="Search courses and documents" aria-describedby="search-button">
@@ -70,7 +70,7 @@
                 <div class="col-lg-2 col-md-3 col-6 mb-4 mb-lg-0">
                     <h6 class="text-uppercase">Resources</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{{ url_for('index') }}" class="text-light">Courses</a></li>
+                        <li class="mb-2"><a href="{{ url_for('main.index') }}" class="text-light">Courses</a></li>
                         <li class="mb-2"><a href="#" class="text-light">Research</a></li>
                         <li class="mb-2"><a href="#" class="text-light">Library</a></li>
                         <li class="mb-2"><a href="#" class="text-light">Journals</a></li>
@@ -134,7 +134,7 @@
                 if (e.shiftKey) {
                     e.preventDefault();
                     // Redirect to admin panel
-                    window.location.href = '{{ url_for("admin_login") }}';
+                    window.location.href = '{{ url_for("admin.admin_login") }}';
                 }
             });
             

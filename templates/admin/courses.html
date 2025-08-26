@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">Courses Management</h1>
-    <a href="{{ url_for('admin_course_new') }}" class="btn btn-admin btn-admin-primary">
+    <a href="{{ url_for('admin.admin_course_new') }}" class="btn btn-admin btn-admin-primary">
         <i class="bi bi-plus-circle"></i>
         <span>New Course</span>
     </a>
@@ -54,10 +54,10 @@
                             <td>{{ course.docs_count }}</td>
                             <td>
                                 <div class="actions-cell">
-                                    <a href="{{ url_for('admin_course_view', course_id=course.id) }}" class="btn btn-admin btn-admin-primary btn-admin-sm" title="View">
+                                    <a href="{{ url_for('admin.admin_course_view', course_id=course.id) }}" class="btn btn-admin btn-admin-primary btn-admin-sm" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ url_for('admin_course_edit', course_id=course.id) }}" class="btn btn-admin btn-admin-secondary btn-admin-sm" title="Edit">
+                                    <a href="{{ url_for('admin.admin_course_edit', course_id=course.id) }}" class="btn btn-admin btn-admin-secondary btn-admin-sm" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </div>
@@ -72,7 +72,7 @@
                 <i class="bi bi-journal-x"></i>
                 <h4>No courses found</h4>
                 <p>Create your first course to get started</p>
-                <a href="{{ url_for('admin_course_new') }}" class="btn btn-admin btn-admin-primary">
+                <a href="{{ url_for('admin.admin_course_new') }}" class="btn btn-admin btn-admin-primary">
                     <i class="bi bi-plus-circle"></i>
                     <span>Create New Course</span>
                 </a>

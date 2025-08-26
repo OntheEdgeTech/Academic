@@ -5,9 +5,9 @@
 {% block breadcrumb %}
 <nav class="admin-breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin_courses') }}">Courses</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin_course_view', course_id=course_id) }}">Course</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_courses') }}">Courses</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_course_view', course_id=course_id) }}">Course</a></li>
         {% if document %}
             <li class="breadcrumb-item active" aria-current="page">Edit Document</li>
         {% else %}
@@ -44,7 +44,7 @@
                 <button type="submit" class="btn btn-admin btn-admin-primary">
                     {% if document %}<i class="bi bi-save"></i>Update Document{% else %}<i class="bi bi-plus-circle"></i>Create Document{% endif %}
                 </button>
-                <a href="{{ url_for('admin_course_view', course_id=course_id) }}" class="btn btn-admin btn-admin-secondary">
+                <a href="{{ url_for('admin.admin_course_view', course_id=course_id) }}" class="btn btn-admin btn-admin-secondary">
                     <i class="bi bi-x-circle"></i>Cancel
                 </a>
             </div>

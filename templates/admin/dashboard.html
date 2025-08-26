@@ -80,10 +80,10 @@
                                     <td>{{ course.docs_count }}</td>
                                     <td>
                                         <div class="actions-cell">
-                                            <a href="{{ url_for('admin_course_view', course_id=course.id) }}" class="btn btn-admin btn-admin-primary btn-admin-sm" title="View">
+                                            <a href="{{ url_for('admin.admin_course_view', course_id=course.id) }}" class="btn btn-admin btn-admin-primary btn-admin-sm" title="View">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="{{ url_for('admin_course_edit', course_id=course.id) }}" class="btn btn-admin btn-admin-secondary btn-admin-sm" title="Edit">
+                                            <a href="{{ url_for('admin.admin_course_edit', course_id=course.id) }}" class="btn btn-admin btn-admin-secondary btn-admin-sm" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                         </div>
@@ -110,15 +110,15 @@
             </div>
             <div class="card-body">
                 <div class="quick-actions">
-                    <a href="{{ url_for('admin_course_new') }}" class="btn btn-admin btn-admin-primary">
+                    <a href="{{ url_for('admin.admin_course_new') }}" class="btn btn-admin btn-admin-primary">
                         <i class="bi bi-plus-circle"></i>
                         <span>Create Course</span>
                     </a>
-                    <a href="{{ url_for('admin_courses') }}" class="btn btn-admin btn-admin-secondary">
+                    <a href="{{ url_for('admin.admin_courses') }}" class="btn btn-admin btn-admin-secondary">
                         <i class="bi bi-journal"></i>
                         <span>Manage Courses</span>
                     </a>
-                    <a href="{{ url_for('index') }}" class="btn btn-admin btn-admin-secondary">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-admin btn-admin-secondary">
                         <i class="bi bi-house"></i>
                         <span>View Portal</span>
                     </a>

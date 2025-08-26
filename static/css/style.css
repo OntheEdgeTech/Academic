@@ -347,6 +347,16 @@ h4 {
   box-shadow: var(--shadow-sm);
 }
 
+.btn-document-read {
+  background: var(--accent-green);
+}
+
+.btn-document-read:hover {
+  background: #0da271;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
 /* Document Content - Reading Optimized */
 .document-content {
   background: white;

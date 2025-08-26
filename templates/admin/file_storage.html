@@ -13,7 +13,7 @@
         <div class="drive-files-section" id="filesContainer">
             <!-- Upload Area - Simplified -->
             <div class="simple-upload-area">
-                <form method="POST" action="{{ url_for('admin_file_storage_upload') }}" enctype="multipart/form-data" class="admin-form" id="uploadForm">
+                <form method="POST" action="{{ url_for('admin.admin_file_storage_upload') }}" enctype="multipart/form-data" class="admin-form" id="uploadForm">
                     <div class="upload-trigger" id="uploadTrigger">
                         <i class="bi bi-plus-circle"></i>
                         <span>Add files</span>
@@ -43,7 +43,7 @@
                 {% if files %}
                 <div class="files-grid">
                     {% for file in files %}
-                    <div class="file-item" data-filename="{{ file.filename }}" data-filepath="{{ url_for('public_file', filename=file.filename) }}">
+                    <div class="file-item" data-filename="{{ file.filename }}" data-filepath="{{ url_for('admin.public_file', filename=file.filename) }}">
                         <div class="file-icon-container">
                             {% if file.filename.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')) %}
                                 <i class="bi bi-file-image file-icon-image"></i>
@@ -85,19 +85,19 @@
                                     <i class="bi bi-three-dots-vertical"></i>
                                 </button>
                                 <div class="file-dropdown">
-                                    <a href="{{ url_for('public_file', filename=file.filename) }}" target="_blank" class="dropdown-item">
+                                    <a href="{{ url_for('admin.public_file', filename=file.filename) }}" target="_blank" class="dropdown-item">
                                         <i class="bi bi-box-arrow-up-right"></i> Open
                                     </a>
-                                    <a href="{{ url_for('public_file', filename=file.filename) }}" download class="dropdown-item">
+                                    <a href="{{ url_for('admin.public_file', filename=file.filename) }}" download class="dropdown-item">
                                         <i class="bi bi-download"></i> Download
                                     </a>
-                                    <form method="POST" action="{{ url_for('admin_file_storage_toggle_public', filename=file.filename) }}">
+                                    <form method="POST" action="{{ url_for('admin.admin_file_storage_toggle_public', filename=file.filename) }}">
                                         <button type="submit" class="dropdown-item">
                                             <i class="bi {% if file.is_public %}bi-lock{% else %}bi-unlock{% endif %}"></i>
                                             {% if file.is_public %}Make Private{% else %}Make Public{% endif %}
                                         </button>
                                     </form>
-                                    <form method="POST" action="{{ url_for('admin_file_storage_delete', filename=file.filename) }}" onsubmit="return confirm('Delete this file?')">
+                                    <form method="POST" action="{{ url_for('admin.admin_file_storage_delete', filename=file.filename) }}" onsubmit="return confirm('Delete this file?')">
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Send files via AJAX
-            fetch('{{ url_for("admin_file_storage_upload") }}', {
+            fetch('{{ url_for("admin.admin_file_storage_upload") }}', {
                 method: 'POST',
                 body: formData
             })
@@ -274,7 +274,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.redirected) {
                     window.location.href = response.url;
                 } else {
-                    return response.text();
+                    // Reload the page to show the uploaded files
+                    window.location.reload();
                 }
             })
             .catch(error => {

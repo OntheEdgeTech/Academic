@@ -75,8 +75,14 @@
                                         <i class="bi bi-file-text"></i>
                                     </div>
                                     <h5 class="document-title">{{ doc.title }}</h5>
-                                    <a href="{{ url_for('course_document', course_id=course.id, filename=doc.filename) }}" 
-                                       class="btn-document">View Document</a>
+                                    <a href="{{ url_for('main.course_document', course_id=course.id, filename=doc.filename) }}" 
+                                       class="btn-document {% if doc.filename in user_progress %}btn-document-read{% endif %}">
+                                        {% if doc.filename in user_progress %}
+                                            <i class="bi bi-check-circle me-1"></i>Completed
+                                        {% else %}
+                                            View Document
+                                        {% endif %}
+                                    </a>
                                 </div>
                             </div>
                         </div>
