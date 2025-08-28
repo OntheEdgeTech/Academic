@@ -201,8 +201,6 @@ This application implements intelligent caching to minimize resource usage and i
 - Search results are cached for 5 minutes
 - Cache is automatically cleared when content changes
 
-See [CACHING.md](CACHING.md) for more details.
-
 ## Rich Markdown Editor
 
 The admin panel includes a rich markdown editor (EasyMDE) for creating and editing documents:
@@ -212,8 +210,6 @@ The admin panel includes a rich markdown editor (EasyMDE) for creating and editi
 - Syntax highlighting for code blocks
 - Side-by-side editing mode
 - Fullscreen editing mode
-
-See [MARKDOWN_EDITOR_INTEGRATION.md](MARKDOWN_EDITOR_INTEGRATION.md) for more details.
 
 ## Docker Support
 
