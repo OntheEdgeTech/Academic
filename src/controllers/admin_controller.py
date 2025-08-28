@@ -3,6 +3,7 @@ from ..services.course_service import CourseService
 from ..services.file_service import FileStorageService
 from ..services.auth_service import AuthService
 from ..utils.helpers import sanitize_path
+from .. import cache
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -111,6 +112,8 @@ def admin_course_new():
                 }
                 
                 if CourseService.save_course_info(course_id, course_data):
+                    # Clear cache after creating a new course
+                    cache.clear()
                     flash(f'Course "{title}" created successfully', 'success')
                     return redirect(url_for('admin.admin_course_view', course_id=course_id))
                 else:
@@ -156,6 +159,8 @@ def admin_course_edit(course_id):
             }
             
             if CourseService.save_course_info(course_id, course_data):
+                # Clear cache after updating a course
+                cache.clear()
                 flash(f'Course "{title}" updated successfully', 'success')
                 return redirect(url_for('admin.admin_course_view', course_id=course_id))
             else:
@@ -190,6 +195,8 @@ def admin_document_new(course_id):
             
             # Save document
             if CourseService.save_document(course_id, filename, content):
+                # Clear cache after creating a new document
+                cache.clear()
                 flash(f'Document "{title}" created successfully', 'success')
                 return redirect(url_for('admin.admin_course_view', course_id=course_id))
             else:
@@ -242,6 +249,8 @@ def admin_document_edit(course_id, filename):
         else:
             # Update document
             if CourseService.save_document(course_id, filename, new_content):
+                # Clear cache after updating a document
+                cache.clear()
                 flash(f'Document "{new_title}" updated successfully', 'success')
                 return redirect(url_for('admin.admin_course_view', course_id=course_id))
             else:
@@ -260,6 +269,8 @@ def admin_document_delete(course_id, filename):
         abort(404)
     
     if CourseService.delete_document(course_id, filename):
+        # Clear cache after deleting a document
+        cache.clear()
         flash('Document deleted successfully', 'success')
     else:
         flash('Error deleting document', 'error')

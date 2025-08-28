@@ -1414,3 +1414,87 @@
 .modal-body iframe {
     border-radius: 8px;
 }
+
+/* EasyMDE Editor Styles */
+.CodeMirror {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    min-height: 400px !important;
+}
+
+.CodeMirror-focused {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+}
+
+.editor-toolbar {
+    border: 1px solid #cbd5e1 !important;
+    border-bottom: none !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 0 10px 0 46px !important;
+}
+
+.editor-toolbar i.separator {
+    border-left: 1px solid #e2e8f0 !important;
+    border-right: none !important;
+}
+
+.editor-toolbar button {
+    color: #334155 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 4px !important;
+    margin: 0 1px !important;
+    height: 32px !important;
+    width: 32px !important;
+}
+
+.editor-toolbar button:hover {
+    background: #f1f5f9 !important;
+    color: #2563eb !important;
+}
+
+.editor-toolbar button.active {
+    background: #2563eb !important;
+    color: white !important;
+}
+
+.editor-preview {
+    background: #f8fafc !important;
+    padding: 20px !important;
+    border-radius: 0 0 8px 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-top: none !important;
+}
+
+.editor-preview-side {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 0 8px 8px 0 !important;
+    padding: 20px !important;
+}
+
+.editor-statusbar {
+    padding: 8px 15px !important;
+    color: #94a3b8 !important;
+    font-size: 0.85rem !important;
+}
+
+/* Responsive improvements for editor */
+@media (max-width: 768px) {
+    .CodeMirror {
+        min-height: 300px !important;
+    }
+    
+    .editor-toolbar {
+        padding: 0 5px 0 30px !important;
+    }
+    
+    .editor-toolbar button {
+        height: 28px !important;
+        width: 28px !important;
+        font-size: 0.9rem !important;
+    }
+}

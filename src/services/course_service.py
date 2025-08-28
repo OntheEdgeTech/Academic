@@ -6,11 +6,13 @@ from pathlib import Path
 from ..models.course_models import Course, Document
 from ..utils.helpers import format_title, extract_title_from_markdown, sanitize_path
 from ..config.settings import Config
+from .. import cache
 
 class CourseService:
     """Service class for course-related operations"""
     
     @staticmethod
+    @cache.cached(timeout=300, key_prefix='all_courses')
     def get_all_courses() -> List[Course]:
         """Get list of all courses"""
         courses = []
@@ -24,6 +26,7 @@ class CourseService:
         return sorted(courses, key=lambda x: x.title)
     
     @staticmethod
+    @cache.memoize(timeout=300)
     def get_course_documents(course_id: str) -> List[Document]:
         """Get list of documents for a specific course"""
         if not sanitize_path(course_id):
@@ -44,6 +47,7 @@ class CourseService:
         return sorted(docs, key=lambda x: x.title)
     
     @staticmethod
+    @cache.memoize(timeout=300)
     def read_course_document(course_id: str, filename: str) -> Tuple[Optional[Document], Optional[str]]:
         """Read and parse markdown document from a course"""
         if not sanitize_path(course_id) or not sanitize_path(filename):
@@ -126,6 +130,7 @@ class CourseService:
         return False
     
     @staticmethod
+    @cache.memoize(timeout=300)
     def _load_course_info(course_id: str) -> Course:
         """Load course information from course.json or create default"""
         if not sanitize_path(course_id):
@@ -153,6 +158,7 @@ class CourseService:
         return course_info
     
     @staticmethod
+    @cache.memoize(timeout=300)
     def _count_course_documents(course_id: str) -> int:
         """Count documents in a course"""
         if not sanitize_path(course_id):

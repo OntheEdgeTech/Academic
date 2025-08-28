@@ -51,26 +51,46 @@
         </form>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-// Simple Markdown helper
+// Initialize EasyMDE Markdown Editor
 document.addEventListener('DOMContentLoaded', function() {
     const contentTextarea = document.getElementById('content');
     if (contentTextarea) {
-        // Add some basic formatting helpers
-        contentTextarea.addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                
-                // Insert 4 spaces at cursor position
-                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
-                
-                // Move cursor to after the inserted spaces
-                this.selectionStart = this.selectionEnd = start + 4;
+        const easyMDE = new EasyMDE({
+            element: contentTextarea,
+            autofocus: true,
+            autosave: {
+                enabled: false
+            },
+            indentWithTabs: false,
+            tabSize: 4,
+            minHeight: "400px",
+            toolbar: [
+                "bold", "italic", "strikethrough", "|",
+                "heading-1", "heading-2", "heading-3", "|",
+                "code", "quote", "|",
+                "unordered-list", "ordered-list", "|",
+                "link", "image", "table", "|",
+                "preview", "side-by-side", "fullscreen", "|",
+                "guide"
+            ],
+            shortcuts: {
+                togglePreview: null,  // Disable default shortcuts to avoid conflicts
+                toggleSideBySide: null,
+                toggleFullScreen: null
             }
         });
+        
+        // Update textarea value when form is submitted
+        const form = contentTextarea.closest('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                contentTextarea.value = easyMDE.value();
+            });
+        }
     }
 });
 </script>

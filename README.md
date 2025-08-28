@@ -11,6 +11,8 @@ A Flask-based web application with an elegant, modern design for academic docume
 - Powerful search functionality across all courses
 - Clean, academic-focused interface
 - Admin panel for content management
+- Rich markdown editor with live preview for document creation
+- Intelligent caching to minimize resource usage and improve performance
 
 > Admin page: /admin
 
@@ -28,19 +30,20 @@ A Flask-based web application with an elegant, modern design for academic docume
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/OntheEdgeTech/Academic.git
+   git clone <repository-url>
+   cd Academic
    ```
 
-2. Setup:
+2. Install dependencies:
    ```bash
-   dockero setup Academic/
+   pip install -r requirements.txt
    ```
 
 ## Usage
 
 1. Run the application:
    ```bash
-   dockero start academic
+   python app.py
    ```
 
 2. Open your web browser and navigate to `http://localhost:80`
@@ -58,10 +61,54 @@ The portal includes an admin panel for managing courses and documents:
 
 1. **Dashboard**: Overview of courses and documents
 2. **Course Management**: Create, edit, and view courses
-3. **Document Management**: Create and edit markdown documents
+3. **Document Management**: Create and edit markdown documents with a rich text editor
 4. **Live Preview**: View changes in the public portal
 
-**Note**: For production use, you should change the default credentials in `app.py`.
+**Note**: For production use, you should change the default credentials in `src/config/settings.py`.
+
+## Project Structure
+
+```
+Academic/
+├── app.py                 # Application entry point
+├── requirements.txt       # Python dependencies
+├── README.md              # This file
+├── .gitignore             # Git ignore rules
+├── Dockerfile             # Docker configuration
+├── CACHING.md             # Documentation on caching implementation
+├── MARKDOWN_EDITOR_INTEGRATION.md  # Documentation on markdown editor
+│
+├── courses/               # Course content directory
+│   └── welding_technology/ # Sample course
+│       ├── course.json    # Course metadata
+│       ├── docs/          # Markdown documents
+│       └── media/         # Media files (if any)
+│
+├── file_storage/          # Public file storage
+│   ├── landing.png        # Landing page screenshot
+│   └── course.png         # Course page screenshot
+│
+├── src/                   # Application source code
+│   ├── __init__.py        # Application factory
+│   ├── config/            # Configuration files
+│   ├── controllers/       # Route handlers
+│   ├── models/            # Data models
+│   ├── services/          # Business logic
+│   └── utils/             # Utility functions
+│
+├── static/                # Static assets
+│   ├── css/               # Stylesheets
+│   ├── js/                # JavaScript files
+│   └── favicon.svg        # Website favicon
+│
+└── templates/             # HTML templates
+    ├── base.html          # Base template
+    ├── index.html         # Home page
+    ├── course.html        # Course page
+    ├── document.html      # Document page
+    ├── search.html        # Search results page
+    └── admin/             # Admin templates
+```
 
 ## Course Structure
 
@@ -134,12 +181,47 @@ To customize the color scheme, modify the CSS variables in `static/css/style.css
 
 ```css
 :root {
-  --primary: #2563eb;      /* Primary color */
-  --primary-dark: #1d4ed8; /* Darker variant */
-  --primary-light: #3b82f6; /* Lighter variant */
-  --secondary: #f1f5f9;    /* Background accent */
-  --light: #ffffff;        /* Main background */
+  --primary-900: #1e3a8a;    /* Deep Blue - Trust, Knowledge */
+  --primary-800: #1e40af;    /* Rich Blue */
+  --primary-700: #2563eb;    /* Main Primary */
+  --primary-600: #3b82f6;    /* Lighter Blue */
+  --primary-100: #dbeafe;    /* Very Light Blue */
+  --accent-green: #10b981;   /* Emerald - Success, Growth */
+  --accent-amber: #f59e0b;   /* Amber - Warnings, Highlights */
+  --accent-red: #ef4444;     /* Red - Advanced Level */
 }
+```
+
+## Caching
+
+This application implements intelligent caching to minimize resource usage and improve performance:
+
+- Course listings are cached for 5 minutes
+- Document content is cached for 5 minutes
+- Search results are cached for 5 minutes
+- Cache is automatically cleared when content changes
+
+See [CACHING.md](CACHING.md) for more details.
+
+## Rich Markdown Editor
+
+The admin panel includes a rich markdown editor (EasyMDE) for creating and editing documents:
+
+- Real-time preview
+- Toolbar with formatting options
+- Syntax highlighting for code blocks
+- Side-by-side editing mode
+- Fullscreen editing mode
+
+See [MARKDOWN_EDITOR_INTEGRATION.md](MARKDOWN_EDITOR_INTEGRATION.md) for more details.
+
+## Docker Support
+
+The application includes a Dockerfile for containerized deployment:
+
+```bash
+docker build -t academic-portal .
+docker run -p 80:80 academic-portal
 ```
 
 ## License

@@ -1,5 +1,9 @@
 from flask import Flask
+from flask_caching import Cache
 from .config.settings import Config
+
+# Initialize cache
+cache = Cache()
 
 def create_app():
     """Application factory function"""
@@ -8,6 +12,11 @@ def create_app():
     
     # Initialize configuration
     Config.init_app(app)
+    
+    # Initialize cache with simple in-memory caching
+    app.config['CACHE_TYPE'] = 'SimpleCache'
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 300  # 5 minutes
+    cache.init_app(app)
     
     # Register template filters
     from .utils.template_filters import register_filters

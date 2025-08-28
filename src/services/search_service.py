@@ -6,11 +6,13 @@ from pathlib import Path
 from ..services.course_service import CourseService
 from ..utils.helpers import extract_title_from_markdown, sanitize_path
 from ..config.settings import Config
+from .. import cache
 
 class SearchService:
     """Service class for search operations"""
     
     @staticmethod
+    @cache.memoize(timeout=300)
     def search_documents(query: str) -> List[Dict]:
         """Search for documents containing the query"""
         results = []
@@ -61,6 +63,7 @@ class SearchService:
         return results
     
     @staticmethod
+    @cache.memoize(timeout=300)
     def _get_course_title(course_id: str) -> str:
         """Get course title from course info or format course ID"""
         if not sanitize_path(course_id):
