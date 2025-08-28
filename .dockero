@@ -1,0 +1,8 @@
+[default]
+name = academic
+image = python:3.9-slim
+command = cd /workspace && pip install -r requirements.txt && python app.py
+
+[volumes]
+env = .:/workspace
+port = 80:80
