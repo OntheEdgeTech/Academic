@@ -60,8 +60,14 @@ class CourseService:
         try:
             content = filepath.read_text(encoding='utf-8')
             
+            all_builtin = [
+                'abbr', 'attr_list', 'def_list', 'fenced_code', 'footnotes', 'md_in_html',
+                'tables', 'admonition', 'codehilite', 'legacy_attrs', 'legacy_em',
+                'meta', 'nl2br', 'sane_lists', 'smarty', 'toc', 'wikilinks'
+            ]
+
             # Convert markdown to HTML
-            md = markdown.Markdown(extensions=['fenced_code', 'tables', 'toc'])
+            md = markdown.Markdown(extensions=all_builtin)
             html_content = md.convert(content)
             
             # Extract title

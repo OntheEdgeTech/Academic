@@ -377,8 +377,6 @@ h4 {
 }
 
 .document-content h2 {
-  border-left: 4px solid var(--primary-700);
-  padding-left: 1.25rem;
   margin-top: 2.5rem;
   margin-bottom: 1.25rem;
   color: var(--primary-800);
@@ -477,6 +475,10 @@ h4 {
   margin: 1.5rem auto;
   display: block;
   box-shadow: var(--shadow-sm);
+}
+
+ul li::marker {
+    content: "• "; /* or "• " or any symbol */
 }
 
 /* Sidebar - Clean Navigation */
