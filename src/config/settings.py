@@ -10,6 +10,7 @@ class Config:
     STATIC_FOLDER = BASE_DIR / 'static'
     TEMPLATES_FOLDER = BASE_DIR / 'templates'
     FILE_STORAGE_FOLDER = BASE_DIR / 'file_storage'
+    DATA_FOLDER = BASE_DIR / 'data'
     
     # File storage configuration
     ALLOWED_EXTENSIONS = {

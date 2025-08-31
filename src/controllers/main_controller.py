@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, abort, make_response, jso
 from ..services.course_service import CourseService
 from ..services.progress_service import UserProgressService
 from ..services.search_service import SearchService
+from ..services.like_service import LikeService
 from ..utils.helpers import sanitize_path
 
 main_bp = Blueprint('main', __name__)
@@ -10,7 +11,14 @@ main_bp = Blueprint('main', __name__)
 def index():
     """Home page - list all courses"""
     courses = CourseService.get_all_courses()
-    return render_template('index.html', courses=courses)
+    # Add like counts to each course
+    for course in courses:
+        course.like_count = LikeService.get_course_likes(course.id)
+    
+    # Get user's liked courses
+    user_liked_courses = LikeService.get_user_liked_courses()
+    
+    return render_template('index.html', courses=courses, user_liked_courses=user_liked_courses)
 
 @main_bp.route('/course/<course_id>')
 def course(course_id):
@@ -30,12 +38,26 @@ def course(course_id):
     user_progress = UserProgressService.get_user_progress(course_id)
     completed_docs = len(user_progress)
     
+    # Get likes for this course
+    likes = LikeService.get_course_likes(course_id)
+    
+    # Get user's liked courses
+    user_liked_courses = LikeService.get_user_liked_courses()
+    is_liked = user_liked_courses.get(course_id, False)
+    
+    # Helper function for templates
+    def min_value(a, b):
+        return min(a, b)
+    
     return render_template(
         'course.html', 
         course=course, 
         docs=docs, 
         completed_docs=completed_docs, 
-        user_progress=user_progress
+        user_progress=user_progress,
+        likes=likes,
+        is_liked=is_liked,
+        min=min_value
     )
 
 @main_bp.route('/course/<course_id>/document/<filename>')

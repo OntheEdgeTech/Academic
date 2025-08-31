@@ -26,6 +26,18 @@
                         <span>{{ course.level }}</span>
                     </div>
                     {% endif %}
+                    <!-- Like Button -->
+                    <div class="course-meta-item">
+                        <button class="btn btn-sm btn-outline-light like-btn {% if is_liked %}liked{% endif %}" 
+                                data-course-id="{{ course.id }}">
+                            <i class="bi bi-heart{% if is_liked %}-fill{% endif %} me-1"></i>
+                            {% if is_liked %}Unlike{% else %}Like{% endif %}
+                        </button>
+                        <span class="ms-2 text-light">
+                            <i class="bi bi-heart-fill text-danger me-1"></i>
+                            <span class="like-count" data-course-id="{{ course.id }}">{{ likes }}</span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -47,7 +59,7 @@
                     <div class="progress" style="height: 12px;">
                         <div class="progress-bar" 
                              role="progressbar" 
-                             style="width: {% if docs|length > 0 %}{{ (completed_docs / docs|length * 100)|int }}%{% else %}0%{% endif %};" 
+                             style="width: {% if docs|length > 0 %}{{ min((completed_docs / docs|length * 100)|int, 100) }}%{% else %}0%{% endif %};" 
                              aria-valuenow="{{ completed_docs }}" 
                              aria-valuemin="0" 
                              aria-valuemax="{{ docs|length }}">
@@ -55,7 +67,7 @@
                     </div>
                     <div class="mt-2 text-muted small">
                         {% if docs|length > 0 %}
-                            {{ (completed_docs / docs|length * 100)|int }}% complete
+                            {{ min((completed_docs / docs|length * 100)|int, 100) }}% complete
                         {% else %}
                             No documents available
                         {% endif %}

@@ -1,0 +1,36 @@
+/* Like Button Styles */
+.like-btn {
+    transition: all 0.3s ease;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+}
+
+.like-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.like-btn.liked {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+}
+
+.like-btn.liked:hover {
+    background-color: var(--primary-700) !important;
+    border-color: var(--primary-700) !important;
+}
+
+.like-btn.liked i.bi-heart {
+    color: white !important;
+}
+
+.course-header .like-btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.course-header .like-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5);
+}
