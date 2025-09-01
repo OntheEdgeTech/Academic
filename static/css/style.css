@@ -35,6 +35,8 @@
 .hero-section {
   background: linear-gradient(135deg, var(--primary-900), var(--primary-800));
   color: white;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-section a {
@@ -45,11 +47,15 @@
 .course-card {
   transition: var(--transition);
   border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--light);
 }
 
 .course-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--primary-100);
 }
 
 /* Stats Cards */
@@ -65,7 +71,7 @@
 
 /* Base Styles - Focus on Readability */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, sans-serif;
   background-color: var(--lightest);
   color: var(--dark);
   line-height: 1.7;
@@ -76,7 +82,7 @@ body {
 
 /* Typography System */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Roboto', sans-serif;
   color: var(--darker);
   font-weight: 700;
   line-height: 1.3;
@@ -182,8 +188,9 @@ h4 {
 }
 
 .search-btn:hover {
-  background: white;
-  color: var(--primary-700);
+  background: var(--primary-700);
+  color: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 /* Hero Section - Minimal & Inspiring */
@@ -200,6 +207,8 @@ h4 {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   line-height: 1.2;
+  letter-spacing: 1px;
+  font-weight: 800;
 }
 
 .hero-section p {
@@ -208,6 +217,7 @@ h4 {
   margin-bottom: 2rem;
   font-weight: 300;
   line-height: 1.7;
+  letter-spacing: 0.5px;
 }
 
 .hero-illustration {
@@ -286,10 +296,11 @@ h4 {
   background: white;
   transition: all 0.2s ease;
   height: 100%;
+  position: relative;
 }
 
 .document-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: var(--primary-100);
 }
@@ -339,22 +350,24 @@ h4 {
   cursor: pointer;
   width: 100%;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
 .btn-document:hover {
   background: var(--primary-800);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
 
 .btn-document-read {
   background: var(--accent-green);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .btn-document-read:hover {
   background: #0da271;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
 
 /* Document Content - Reading Optimized */
@@ -374,18 +387,24 @@ h4 {
   margin-bottom: 1.75rem;
   font-size: 2.25rem;
   text-align: center;
+  letter-spacing: 1px;
+  font-weight: 800;
 }
 
 .document-content h2 {
   margin-top: 2.5rem;
   margin-bottom: 1.25rem;
   color: var(--primary-800);
+  letter-spacing: 0.5px;
+  font-weight: 700;
 }
 
 .document-content h3 {
   color: var(--primary-700);
   margin-top: 2rem;
   margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
 }
 
 .document-content p {
@@ -536,7 +555,7 @@ ul li::marker {
 
 .footer h5 {
   color: white;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-weight: 600;
   margin-bottom: 1.25rem;
 }
@@ -665,25 +684,28 @@ ul li::marker {
   background-color: var(--primary-700);
   border-color: var(--primary-700);
   color: white;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-800);
   border-color: var(--primary-800);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
 
 .btn-outline-primary {
   border-color: var(--primary-700);
   color: var(--primary-700);
   background: transparent;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
 }
 
 .btn-outline-primary:hover {
   background-color: var(--primary-700);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  border-color: var(--primary-700);
 }
 
 /* Alerts - Gentle Notifications */
@@ -712,6 +734,8 @@ ul li::marker {
   color: white;
   font-size: 2.25rem;
   margin-bottom: 0.75rem;
+  letter-spacing: 1px;
+  font-weight: 800;
 }
 
 .course-header .lead {
@@ -721,6 +745,7 @@ ul li::marker {
   margin: 0 auto 1.5rem auto;
   font-weight: 300;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .course-meta {
