@@ -48,20 +48,11 @@
                 </div>
                 
                 <div class="admin-navbar-user">
-                    <div class="admin-user-dropdown">
-                        <div class="admin-user-trigger">
-                            <div class="admin-user-avatar">
-                                <i class="bi bi-person-fill"></i>
-                            </div>
-                            <span class="admin-username">Administrator</span>
-                            <i class="bi bi-chevron-down"></i>
-                        </div>
-                        <div class="admin-user-menu">
-                            <a href="{{ url_for('admin.admin_logout') }}" class="admin-logout-item">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Logout</span>
-                            </a>
-                        </div>
+                    <div class="admin-user-dropdown">  
+                      <a href="{{ url_for('admin.admin_logout') }}" class="admin-logout-item">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                      </a> 
                     </div>
                 </div>
             </div>

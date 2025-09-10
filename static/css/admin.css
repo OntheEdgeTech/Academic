@@ -162,68 +162,11 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
-.admin-user-trigger {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 10px;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.admin-user-trigger:hover {
-    background: #f1f5f9;
-}
-
-.admin-user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.admin-username {
-    color: #334155;
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-.admin-user-trigger i:last-child {
-    color: #94a3b8;
-    font-size: 0.8rem;
-    transition: transform 0.2s ease;
-}
-
 .admin-user-dropdown:hover .admin-user-trigger i:last-child {
     transform: rotate(180deg);
 }
 
-.admin-user-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 200px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0;
-    padding: 8px 0;
-    margin-top: 8px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: all 0.2s ease;
-    z-index: 100;
-}
-
-.admin-user-dropdown:hover .admin-user-menu {
+.admin-user-dropdown:hover {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
