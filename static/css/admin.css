@@ -1547,8 +1547,6 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.95rem;
     transition: all 0.2s ease;
     font-weight: 500;
-    border-radius: 6px;
-    margin: 0 8px;
 }
 
 .file-dropdown .dropdown-item:hover {
