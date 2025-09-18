@@ -229,8 +229,12 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--card-bg);
     transition: all 0.2s ease;
     border: 1px solid var(--border-color);
-    overflow: hidden;
     position: relative;
+}
+
+/* Only apply overflow hidden when not in full screen mode */
+.admin-card:not(.editor-fullscreen) {
+    overflow: hidden;
 }
 
 .admin-card::before {
@@ -249,6 +253,13 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     border-color: var(--neutral-300);
+}
+
+/* Disable hover effects when in full screen mode */
+.admin-card.editor-fullscreen:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--border-color);
 }
 
 .admin-card .card-header {
@@ -1673,6 +1684,70 @@ h1, h2, h3, h4, h5, h6 {
     padding: 10px 18px !important;
     color: #94a3b8 !important;
     font-size: 0.9rem !important;
+}
+
+/* Fix for EasyMDE full screen mode */
+.editor-toolbar.fullscreen {
+    z-index: 1001 !important; /* Higher than admin navbar */
+}
+
+.CodeMirror-fullscreen {
+    z-index: 1001 !important; /* Higher than admin navbar */
+    position: fixed !important;
+    top: 50px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: auto !important;
+}
+
+.editor-preview-full {
+    z-index: 1001 !important; /* Higher than admin navbar */
+}
+
+.admin-card.editor-fullscreen {
+    overflow: visible !important;
+    position: static !important;
+}
+
+/* Ensure the full screen editor is not constrained by parent elements */
+.EasyMDEContainer .CodeMirror-fullscreen {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+/* Disable hover effects when in full screen mode */
+.admin-card.editor-fullscreen:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--border-color);
+}
+
+/* Prevent all hover effects when editor is in full screen mode */
+body.editor-in-fullscreen *:hover {
+    /* This will prevent any hover effects from triggering */
+    pointer-events: none;
+}
+
+/* But allow interactions with the editor itself */
+body.editor-in-fullscreen .CodeMirror,
+body.editor-in-fullscreen .editor-toolbar,
+body.editor-in-fullscreen .editor-toolbar button,
+body.editor-in-fullscreen .editor-toolbar .easymde-dropdown {
+    pointer-events: auto;
+}
+
+/* Also allow interactions with form elements and buttons */
+body.editor-in-fullscreen input,
+body.editor-in-fullscreen textarea,
+body.editor-in-fullscreen button,
+body.editor-in-fullscreen select,
+body.editor-in-fullscreen a {
+    pointer-events: auto;
 }
 
 /* Responsive improvements for editor */

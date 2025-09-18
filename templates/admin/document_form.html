@@ -55,43 +55,114 @@
 
 {% block extra_js %}
 <script>
-// Initialize EasyMDE Markdown Editor
-document.addEventListener('DOMContentLoaded', function() {
-    const contentTextarea = document.getElementById('content');
-    if (contentTextarea) {
-        const easyMDE = new EasyMDE({
-            element: contentTextarea,
-            autofocus: true,
-            autosave: {
-                enabled: false
-            },
-            indentWithTabs: false,
-            tabSize: 4,
-            minHeight: "400px",
-            toolbar: [
-                "bold", "italic", "strikethrough", "|",
-                "heading-1", "heading-2", "heading-3", "|",
-                "code", "quote", "|",
-                "unordered-list", "ordered-list", "|",
-                "link", "image", "table", "|",
-                "preview", "side-by-side", "fullscreen", "|",
-                "guide"
-            ],
-            shortcuts: {
-                togglePreview: null,  // Disable default shortcuts to avoid conflicts
-                toggleSideBySide: null,
-                toggleFullScreen: null
+        // Initialize EasyMDE Markdown Editor
+        const contentTextarea = document.getElementById('content');
+        if (contentTextarea) {
+            // Ensure the textarea has the correct styling before initializing
+            contentTextarea.style.fontFamily = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
+            
+            let easyMDE;
+            try {
+                easyMDE = new EasyMDE({
+                    element: contentTextarea,
+                    autofocus: true,
+                    autosave: {
+                        enabled: false
+                    },
+                    indentWithTabs: false,
+                    tabSize: 4,
+                    minHeight: "400px",
+                    toolbar: [
+                        "bold", "italic", "strikethrough", "|",
+                        "heading-1", "heading-2", "heading-3", "|",
+                        "code", "quote", "|",
+                        "unordered-list", "ordered-list", "|",
+                        "link", "image", "table", "|",
+                        "preview", "side-by-side", "fullscreen", "|",
+                        "guide"
+                    ],
+                    shortcuts: {
+                        togglePreview: null,  // Disable default shortcuts to avoid conflicts
+                        toggleSideBySide: null,
+                        toggleFullScreen: null
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to initialize EasyMDE:', e);
+                // Fallback to basic textarea if editor fails to load
+                contentTextarea.style.minHeight = "400px";
+                contentTextarea.style.fontFamily = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
+                return;
             }
-        });
-        
-        // Update textarea value when form is submitted
-        const form = contentTextarea.closest('form');
-        if (form) {
-            form.addEventListener('submit', function() {
-                contentTextarea.value = easyMDE.value();
-            });
+            
+            // Handle full screen mode changes more reliably
+            const toolbar = easyMDE.toolbarElements;
+            if (toolbar && toolbar.fullscreen) {
+                // Use a MutationObserver to detect class changes on the toolbar
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            const isAdminCard = contentTextarea.closest('.admin-card');
+                            const isFullScreen = toolbar.fullscreen.classList.contains('active');
+                            
+                            if (isAdminCard) {
+                                if (isFullScreen) {
+                                    isAdminCard.classList.add('editor-fullscreen');
+                                    document.body.classList.add('editor-in-fullscreen');
+                                } else {
+                                    isAdminCard.classList.remove('editor-fullscreen');
+                                    document.body.classList.remove('editor-in-fullscreen');
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                // Start observing the fullscreen button for class changes
+                observer.observe(toolbar.fullscreen, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+                
+                // Also handle the ESC key for exiting full screen
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        // Small delay to ensure the class is removed
+                        setTimeout(function() {
+                            const isAdminCard = contentTextarea.closest('.admin-card');
+                            if (isAdminCard) {
+                                const isFullScreen = toolbar.fullscreen.classList.contains('active');
+                                if (!isFullScreen) {
+                                    isAdminCard.classList.remove('editor-fullscreen');
+                                    document.body.classList.remove('editor-in-fullscreen');
+                                }
+                            }
+                        }, 50);
+                    }
+                });
+                
+                // Clean up observer when page is unloaded
+                window.addEventListener('beforeunload', function() {
+                    observer.disconnect();
+                    // Clean up classes if they exist
+                    document.body.classList.remove('editor-in-fullscreen');
+                    const adminCard = contentTextarea.closest('.admin-card');
+                    if (adminCard) {
+                        adminCard.classList.remove('editor-fullscreen');
+                    }
+                });
+            }
+            
+            // Update textarea value when form is submitted
+            const form = contentTextarea.closest('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    // Only update if EasyMDE was successfully initialized
+                    if (easyMDE) {
+                        contentTextarea.value = easyMDE.value();
+                    }
+                });
+            }
         }
-    }
-});
 </script>
 {% endblock %}
