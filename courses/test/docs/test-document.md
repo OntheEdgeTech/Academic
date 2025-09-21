@@ -1,7 +1,5 @@
 # Markdown syntax guide
 
-## Headers
-
 # This is a Heading h1
 ## This is a Heading h2
 ###### This is a Heading h6
@@ -52,7 +50,7 @@ You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
 ## Tables
 
 | Left columns  | Right columns |
-| ------------- |:-------------:|
+|-------------|-------------|
 | left foo      | right foo     |
 | left bar      | right bar     |
 | left baz      | right baz     |

@@ -1,168 +1,1202 @@
-{% extends "admin/base.html" %}
-
-{% block title %}{% if document %}Edit Document{% else %}New Document{% endif %}{% endblock %}
-
-{% block breadcrumb %}
-<nav class="admin-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_courses') }}">Courses</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_course_view', course_id=course_id) }}">Course</a></li>
-        {% if document %}
-            <li class="breadcrumb-item active" aria-current="page">Edit Document</li>
-        {% else %}
-            <li class="breadcrumb-item active" aria-current="page">New Document</li>
-        {% endif %}
-    </ol>
-</nav>
-{% endblock %}
-
-{% block content %}
-<div class="admin-card">
-    <div class="card-header">
-        <h5 class="mb-0">{% if document %}Edit Document{% else %}Create New Document{% endif %}</h5>
-    </div>
-    <div class="card-body">
-        <form method="POST" class="admin-form">
-            <div class="mb-3">
-                <label for="title" class="form-label">Document Title</label>
-                <input type="text" class="form-control" id="title" name="title" 
-                       value="{{ document.title if document else '' }}" required>
-                <div class="form-text">This will be used as the document heading and filename.</div>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if document %}Edit Document{% else %}New Document{% endif %} - Academic Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            /* macOS-inspired colors */
+            --macos-window-bg: #f5f5f7;
+            --macos-toolbar-bg: #ffffff;
+            --macos-sidebar-bg: #ffffff;
+            --macos-editor-bg: #ffffff;
+            --macos-preview-bg: #f8f9fa;
+            --macos-border: #e0e0e0;
+            --macos-text: #333333;
+            --macos-text-secondary: #666666;
+            --macos-accent: #007aff;
+            --macos-accent-hover: #0062cc;
+            --macos-success: #34c759;
+            --macos-warning: #ff9500;
+            --macos-danger: #ff3b30;
             
-            <div class="mb-3">
-                <label for="content" class="form-label">Content</label>
-                <textarea class="form-control" id="content" name="content" rows="20">{{ document.content if document else '' }}</textarea>
-                <div class="form-text">
-                    Use <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank">Markdown</a> for formatting. 
-                    The first line starting with # will be used as the document title if not specified above.
+            /* Traffic light colors */
+            --traffic-light-close: #ff5f57;
+            --traffic-light-minimize: #febc2e;
+            --traffic-light-maximize: #28c840;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--macos-window-bg);
+            color: var(--macos-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Modal mode styles */
+        body.modal-mode {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body.modal-mode .macos-window-controls {
+            display: none;
+        }
+        
+        body.modal-mode .editor-layout {
+            margin-top: 0;
+            height: 100vh;
+        }
+        
+        body.modal-mode .editor-toolbar {
+            padding: 8px 15px;
+        }
+        
+        body.modal-mode .toolbar-group {
+            padding: 0 8px;
+        }
+        
+        body.modal-mode .toolbar-button {
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+        }
+        
+        body.modal-mode .document-title-display {
+            font-size: 14px;
+            padding: 4px 8px;
+            max-width: 200px;
+        }
+        
+        body.modal-mode .pane-header {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+        
+        body.modal-mode .editor-textarea {
+            padding: 15px;
+            font-size: 13px;
+        }
+        
+        body.modal-mode .editor-preview {
+            padding: 15px;
+            font-size: 14px;
+        }
+        
+        body.modal-mode .status-bar {
+            padding: 6px 15px;
+            font-size: 11px;
+        }
+        
+        /* macOS-style window controls */
+        .macos-window-controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 32px;
+            background: var(--macos-toolbar-bg);
+            border-bottom: 1px solid var(--macos-border);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+        
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+            margin-right: 16px;
+            -webkit-app-region: no-drag;
+        }
+        
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .traffic-light.close {
+            background-color: var(--traffic-light-close);
+        }
+        
+        .traffic-light.minimize {
+            background-color: var(--traffic-light-minimize);
+        }
+        
+        .traffic-light.maximize {
+            background-color: var(--traffic-light-maximize);
+        }
+        
+        .window-title {
+            font-size: 14px;
+            color: var(--macos-text-secondary);
+            flex: 1;
+            text-align: center;
+            -webkit-app-region: no-drag;
+        }
+        
+        /* Main editor layout */
+        .editor-layout {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 32px);
+            margin-top: 32px;
+            overflow: hidden;
+        }
+        
+        /* Editor area */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--macos-editor-bg);
+            overflow: hidden;
+        }
+        
+        /* Toolbar */
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--macos-border);
+            background: var(--macos-toolbar-bg);
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            border-right: 1px solid var(--macos-border);
+        }
+        
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+        
+        .toolbar-button {
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--macos-text);
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        
+        .toolbar-button:hover {
+            background: rgba(0, 122, 255, 0.1);
+        }
+        
+        .toolbar-button.active {
+            background: rgba(0, 122, 255, 0.15);
+            color: var(--macos-accent);
+        }
+        
+        .document-title-display {
+            font-weight: 600;
+            color: var(--macos-text);
+            font-size: 16px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(0, 122, 255, 0.05);
+            border: 1px solid rgba(0, 122, 255, 0.1);
+            margin-left: auto;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Editor content */
+        .editor-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--macos-border);
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .editor-pane:last-child {
+            border-right: none;
+        }
+        
+        .pane-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--macos-border);
+            background: var(--macos-toolbar-bg);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .editor-textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 20px;
+            font-family: 'Roboto Mono', 'SF Mono', Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            background: var(--macos-editor-bg);
+            color: var(--macos-text);
+            overflow: auto;
+        }
+        
+        .editor-textarea:focus {
+            box-shadow: none;
+        }
+        
+        .editor-preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .editor-preview {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--macos-preview-bg);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            height: 100%;
+            min-height: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        #editor-preview {
+            height: 100%;
+            overflow-y: auto;
+            min-height: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Markdown preview content wrapper */
+        .markdown-preview-content {
+            height: 100%;
+            overflow-y: visible;
+            padding-bottom: 50px;
+        }
+        
+        .editor-preview h1,
+        .editor-preview h2,
+        .editor-preview h3,
+        .editor-preview h4,
+        .editor-preview h5,
+        .editor-preview h6 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--macos-text);
+        }
+        
+        .editor-preview table {
+            width: 100%;
+            margin: 1rem 0;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid var(--macos-border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .editor-preview table th,
+        .editor-preview table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--macos-border);
+        }
+        
+        .editor-preview table th {
+            background-color: rgba(0, 122, 255, 0.05);
+            font-weight: 600;
+            color: var(--macos-text);
+        }
+        
+        .editor-preview table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .editor-preview table tr:hover {
+            background-color: rgba(0, 122, 255, 0.03);
+        }
+        
+        .editor-preview p {
+            margin-bottom: 0.8rem;
+        }
+        
+        .editor-preview a {
+            color: var(--macos-accent);
+            text-decoration: none;
+        }
+        
+        .editor-preview a:hover {
+            text-decoration: underline;
+        }
+        
+        .editor-preview img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: block;
+        }
+        
+        .editor-preview code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .editor-preview pre {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid var(--macos-border);
+        }
+        
+        .editor-preview pre code {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        /* Code highlighting classes */
+        .editor-preview .codehilite .hll { background-color: #ffffcc }
+        .editor-preview .codehilite .c { color: #6a737d; font-style: italic }
+        .editor-preview .codehilite .err { border: 1px solid #FF0000 }
+        .editor-preview .codehilite .k { color: #d73a49; font-weight: bold }
+        .editor-preview .codehilite .o { color: #000000; font-weight: bold }
+        .editor-preview .codehilite .cm { color: #6a737d; font-style: italic }
+        .editor-preview .codehilite .cp { color: #6a737d; font-weight: bold }
+        .editor-preview .codehilite .c1 { color: #6a737d; font-style: italic }
+        .editor-preview .codehilite .cs { color: #6a737d; font-weight: bold; font-style: italic }
+        .editor-preview .codehilite .gd { color: #000000; background-color: #ffdddd }
+        .editor-preview .codehilite .ge { color: #000000; font-style: italic }
+        .editor-preview .codehilite .gr { color: #aa0000 }
+        .editor-preview .codehilite .gh { color: #999999 }
+        .editor-preview .codehilite .gi { color: #000000; background-color: #ddffdd }
+        .editor-preview .codehilite .go { color: #888888 }
+        .editor-preview .codehilite .gp { color: #555555 }
+        .editor-preview .codehilite .gs { font-weight: bold }
+        .editor-preview .codehilite .gu { color: #aaaaaa }
+        .editor-preview .codehilite .gt { color: #aa0000 }
+        .editor-preview .codehilite .kc { color: #d73a49; font-weight: bold }
+        .editor-preview .codehilite .kd { color: #d73a49; font-weight: bold }
+        .editor-preview .codehilite .kn { color: #d73a49; font-weight: bold }
+        .editor-preview .codehilite .kp { color: #d73a49; font-weight: bold }
+        .editor-preview .codehilite .kr { color: #d73a49; font-weight: bold }
+        .editor-preview .codehilite .kt { color: #445588; font-weight: bold }
+        .editor-preview .codehilite .m { color: #009999 }
+        .editor-preview .codehilite .s { color: #032f62 }
+        .editor-preview .codehilite .na { color: #008080 }
+        .editor-preview .codehilite .nb { color: #0086B3 }
+        .editor-preview .codehilite .nc { color: #445588; font-weight: bold }
+        .editor-preview .codehilite .no { color: #008080 }
+        .editor-preview .codehilite .nd { color: #3c5d5d; font-weight: bold }
+        .editor-preview .codehilite .ni { color: #800080 }
+        .editor-preview .codehilite .ne { color: #990000; font-weight: bold }
+        .editor-preview .codehilite .nf { color: #990000; font-weight: bold }
+        .editor-preview .codehilite .nl { color: #990000; font-weight: bold }
+        .editor-preview .codehilite .nn { color: #555555 }
+        .editor-preview .codehilite .nt { color: #000080 }
+        .editor-preview .codehilite .nv { color: #008080 }
+        .editor-preview .codehilite .ow { color: #000000; font-weight: bold }
+        .editor-preview .codehilite .w { color: #bbbbbb }
+        .editor-preview .codehilite .mf { color: #009999 }
+        .editor-preview .codehilite .mh { color: #009999 }
+        .editor-preview .codehilite .mi { color: #009999 }
+        .editor-preview .codehilite .mo { color: #009999 }
+        .editor-preview .codehilite .sb { color: #032f62 }
+        .editor-preview .codehilite .sc { color: #032f62 }
+        .editor-preview .codehilite .sd { color: #032f62 }
+        .editor-preview .codehilite .s2 { color: #032f62 }
+        .editor-preview .codehilite .se { color: #032f62 }
+        .editor-preview .codehilite .sh { color: #032f62 }
+        .editor-preview .codehilite .si { color: #032f62 }
+        .editor-preview .codehilite .sx { color: #032f62 }
+        .editor-preview .codehilite .sr { color: #009926 }
+        .editor-preview .codehilite .s1 { color: #032f62 }
+        .editor-preview .codehilite .ss { color: #990073 }
+        .editor-preview .codehilite .bp { color: #999999 }
+        .editor-preview .codehilite .vc { color: #008080 }
+        .editor-preview .codehilite .vg { color: #008080 }
+        .editor-preview .codehilite .vi { color: #008080 }
+        .editor-preview .codehilite .il { color: #009999 }
+        
+        .editor-preview blockquote {
+            border-left: 4px solid var(--macos-accent);
+            padding: 0 1rem;
+            margin: 1rem 0;
+            color: var(--macos-text-secondary);
+            font-style: italic;
+        }
+        
+        .editor-preview ul,
+        .editor-preview ol {
+            margin: 0.8rem 0;
+            padding-left: 2rem;
+        }
+        
+        .editor-preview li {
+            margin-bottom: 0.3rem;
+        }
+        
+        .editor-preview hr {
+            border: none;
+            border-top: 1px solid var(--macos-border);
+            margin: 1.5rem 0;
+        }
+        
+        .editor-preview del {
+            text-decoration: line-through;
+            color: var(--macos-text-secondary);
+        }
+        
+        .editor-preview input[type="checkbox"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        /* Math elements */
+        .math-inline {
+            font-family: 'Roboto Mono', monospace;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-style: italic;
+        }
+        
+        .math-block {
+            font-family: 'Roboto Mono', monospace;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid var(--macos-border);
+            font-style: italic;
+            text-align: center;
+        }
+        
+        /* Definition lists */
+        .editor-preview dl {
+            margin: 1rem 0;
+        }
+        
+        .editor-preview dt {
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .editor-preview dd {
+            margin-left: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Preview placeholder and error */
+        .preview-placeholder {
+            color: var(--macos-text-secondary);
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .preview-error {
+            color: var(--macos-danger);
+            background-color: rgba(255, 59, 48, 0.1);
+            border: 1px solid var(--macos-danger);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem;
+        }
+        
+        /* Status bar */
+        .status-bar {
+            padding: 8px 20px;
+            border-top: 1px solid var(--macos-border);
+            background: var(--macos-toolbar-bg);
+            font-size: 12px;
+            color: var(--macos-text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Auto-save notification */
+        .autosave-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--macos-toolbar-bg);
+            border: 1px solid var(--macos-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 14px;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .autosave-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .autosave-notification.success {
+            color: var(--macos-success);
+        }
+        
+        .autosave-notification.error {
+            color: var(--macos-danger);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .document-title-display {
+                display: none;
+            }
+            
+            .editor-toolbar {
+                flex-wrap: wrap;
+            }
+            
+            .toolbar-group {
+                padding: 0 8px;
+            }
+            
+            .editor-preview {
+                padding: 15px;
+                font-size: 15px;
+            }
+            
+            .editor-preview h1 {
+                font-size: 1.8rem;
+            }
+            
+            .editor-preview h2 {
+                font-size: 1.5rem;
+            }
+            
+            .editor-preview h3 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: -240px;
+                z-index: 900;
+                height: calc(100vh - 32px);
+            }
+            
+            .sidebar.visible {
+                left: 0;
+            }
+            
+            .sidebar-toggle {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+            
+            .document-title-display {
+                max-width: 150px;
+                font-size: 13px;
+            }
+        }
+        
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 45px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--macos-toolbar-bg);
+            border: 1px solid var(--macos-border);
+            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- macOS-style window controls -->
+    <div class="macos-window-controls">
+        <div class="window-title">{% if document %}Edit Document{% else %}New Document{% endif %} - Academic Portal</div>
+    </div>
+    
+    <!-- Mobile menu toggle -->
+    <div class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="bi bi-list"></i>
+    </div>
+    
+    <!-- Main editor layout -->
+    <div class="editor-layout">
+        <!-- Editor area -->
+        <div class="editor-area">
+            <!-- Toolbar -->
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button class="toolbar-button" data-command="bold" title="Bold">
+                        <i class="bi bi-type-bold"></i>
+                    </button>
+                    <button class="toolbar-button" data-command="italic" title="Italic">
+                        <i class="bi bi-type-italic"></i>
+                    </button>
+                    <button class="toolbar-button" data-command="heading" title="Heading">
+                        <i class="bi bi-type-h1"></i>
+                    </button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="toolbar-button" data-command="link" title="Link">
+                        <i class="bi bi-link"></i>
+                    </button>
+                    <button class="toolbar-button" data-command="image" title="Image">
+                        <i class="bi bi-image"></i>
+                    </button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="toolbar-button" id="preview-toggle" title="Toggle Preview">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="toolbar-button" id="split-view" title="Split View">
+                        <i class="bi bi-layout-split"></i>
+                    </button>
+                </div>
+                <div class="document-title-display" id="document-title-display">
+                    {% if document %}{{ document.title }}{% else %}Untitled Document{% endif %}
                 </div>
             </div>
             
-            <div class="mt-4 d-flex gap-2 flex-wrap">
-                <button type="submit" class="btn btn-admin btn-admin-primary">
-                    {% if document %}<i class="bi bi-save"></i>Update Document{% else %}<i class="bi bi-plus-circle"></i>Create Document{% endif %}
-                </button>
-                <a href="{{ url_for('admin.admin_course_view', course_id=course_id) }}" class="btn btn-admin btn-admin-secondary">
-                    <i class="bi bi-x-circle"></i>Cancel
-                </a>
+            <!-- Editor content -->
+            <div class="editor-content">
+                <div class="editor-pane">
+                    <div class="pane-header">
+                        <span>Editor</span>
+                    </div>
+                    <textarea class="editor-textarea" id="content" name="content">{{ document.content if document else '' }}</textarea>
+                </div>
+                <div class="editor-pane" id="preview-pane" style="display: none;">
+                    <div class="pane-header">
+                        <span>Preview</span>
+                    </div>
+                    <div class="editor-preview-container">
+                        <div class="editor-preview" id="editor-preview"></div>
+                    </div>
+                </div>
             </div>
-        </form>
+            
+            <!-- Status bar -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <i class="bi bi-font"></i>
+                    <span id="word-count">0 words</span>
+                </div>
+                <div class="status-item">
+                    <i class="bi bi-clock"></i>
+                    <span id="last-saved">Not saved yet</span>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-        // Initialize EasyMDE Markdown Editor
-        const contentTextarea = document.getElementById('content');
-        if (contentTextarea) {
-            // Ensure the textarea has the correct styling before initializing
-            contentTextarea.style.fontFamily = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
+    
+    <!-- Auto-save notification -->
+    <div class="autosave-notification" id="autosave-notification">
+        <i class="bi bi-check-circle-fill"></i>
+        <span id="notification-text">All changes saved</span>
+    </div>
+    
+    <!-- Hidden form fields -->
+    <form method="POST" id="document-form" style="display: none;">
+        <input type="hidden" id="title" name="title" value="{{ document.title if document else 'Untitled Document' }}">
+        <input type="hidden" name="autosave" value="true">
+    </form>
+    
+    <script>
+        // Modern macOS-style Editor with Auto-save
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we're in modal mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const isModalMode = urlParams.has('modal');
             
-            let easyMDE;
-            try {
-                easyMDE = new EasyMDE({
-                    element: contentTextarea,
-                    autofocus: true,
-                    autosave: {
-                        enabled: false
-                    },
-                    indentWithTabs: false,
-                    tabSize: 4,
-                    minHeight: "400px",
-                    toolbar: [
-                        "bold", "italic", "strikethrough", "|",
-                        "heading-1", "heading-2", "heading-3", "|",
-                        "code", "quote", "|",
-                        "unordered-list", "ordered-list", "|",
-                        "link", "image", "table", "|",
-                        "preview", "side-by-side", "fullscreen", "|",
-                        "guide"
-                    ],
-                    shortcuts: {
-                        togglePreview: null,  // Disable default shortcuts to avoid conflicts
-                        toggleSideBySide: null,
-                        toggleFullScreen: null
-                    }
-                });
-            } catch (e) {
-                console.error('Failed to initialize EasyMDE:', e);
-                // Fallback to basic textarea if editor fails to load
-                contentTextarea.style.minHeight = "400px";
-                contentTextarea.style.fontFamily = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
-                return;
+            if (isModalMode) {
+                document.body.classList.add('modal-mode');
             }
             
-            // Handle full screen mode changes more reliably
-            const toolbar = easyMDE.toolbarElements;
-            if (toolbar && toolbar.fullscreen) {
-                // Use a MutationObserver to detect class changes on the toolbar
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                            const isAdminCard = contentTextarea.closest('.admin-card');
-                            const isFullScreen = toolbar.fullscreen.classList.contains('active');
+            // DOM Elements
+            const contentTextarea = document.getElementById('content');
+            const previewToggle = document.getElementById('preview-toggle');
+            const splitView = document.getElementById('split-view');
+            const editorPreview = document.getElementById('editor-preview');
+            const previewPane = document.getElementById('preview-pane');
+            const documentTitleDisplay = document.getElementById('document-title-display');
+            const wordCount = document.getElementById('word-count');
+            const lastSaved = document.getElementById('last-saved');
+            const autosaveNotification = document.getElementById('autosave-notification');
+            const notificationText = document.getElementById('notification-text');
+            const titleInput = document.getElementById('title');
+            
+            // State variables
+            let autoSaveTimeout;
+            let lastSavedContent = {
+                title: titleInput ? titleInput.value : '',
+                content: contentTextarea ? contentTextarea.value : ''
+            };
+            let isPreviewVisible = false;
+            let isSplitView = false;
+            
+            // Show auto-save notification
+            function showAutoSaveNotification(message, isError = false) {
+                notificationText.textContent = message;
+                autosaveNotification.className = 'autosave-notification show ' + (isError ? 'error' : 'success');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    autosaveNotification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Extract title from content (first line starting with #)
+            function extractTitleFromContent(content) {
+                if (!content) return 'Untitled Document';
+                const lines = content.split('\n');
+                if (lines.length > 0 && lines[0].trim().startsWith('#')) {
+                    const title = lines[0].trim().substring(1).trim();
+                    return title || 'Untitled Document';
+                }
+                return 'Untitled Document';
+            }
+            
+            // Update title display
+            function updateTitle() {
+                const content = contentTextarea.value;
+                const title = extractTitleFromContent(content);
+                documentTitleDisplay.textContent = title;
+                if (titleInput) {
+                    titleInput.value = title;
+                }
+            }
+            
+            // Update word count
+            function updateWordCount() {
+                const content = contentTextarea.value;
+                const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+                wordCount.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
+            }
+            
+            // Simple hash function for content comparison
+            function hashContent(content) {
+                let hash = 0;
+                if (content.length === 0) return hash;
+                for (let i = 0; i < content.length; i++) {
+                    const char = content.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                return hash;
+            }
+            
+            // Store the hash of the last rendered content
+            let lastRenderedContentHash = 0;
+            
+            // Update preview using backend rendering with debouncing
+            let previewTimeout;
+            function updatePreview() {
+                if (isPreviewVisible || isSplitView) {
+                    // Clear any existing preview timeout
+                    if (previewTimeout) {
+                        clearTimeout(previewTimeout);
+                    }
+                    
+                    // Debounce preview updates (500ms)
+                    previewTimeout = setTimeout(() => {
+                        const content = contentTextarea.value;
+                        const contentHash = hashContent(content);
+                        
+                        // Only update if content has actually changed
+                        if (contentHash !== lastRenderedContentHash) {
+                            // Show loading indicator
+                            editorPreview.innerHTML = '<div class="preview-placeholder">Rendering...</div>';
                             
-                            if (isAdminCard) {
-                                if (isFullScreen) {
-                                    isAdminCard.classList.add('editor-fullscreen');
-                                    document.body.classList.add('editor-in-fullscreen');
+                            // Send content to backend for rendering
+                            const formData = new FormData();
+                            formData.append('content', content);
+                            
+                            fetch('/admin/render-markdown', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    editorPreview.innerHTML = data.html;
+                                    lastRenderedContentHash = contentHash;
+                                    // Ensure scroll works after content update
+                                    setTimeout(() => {
+                                        editorPreview.scrollTop = 0;
+                                    }, 10);
                                 } else {
-                                    isAdminCard.classList.remove('editor-fullscreen');
-                                    document.body.classList.remove('editor-in-fullscreen');
+                                    editorPreview.innerHTML = '<div class="preview-error">Error rendering preview: ' + data.error + '</div>';
                                 }
-                            }
+                            })
+                            .catch(error => {
+                                editorPreview.innerHTML = '<div class="preview-error">Error rendering preview: ' + error.message + '</div>';
+                            });
                         }
-                    });
-                });
-                
-                // Start observing the fullscreen button for class changes
-                observer.observe(toolbar.fullscreen, {
-                    attributes: true,
-                    attributeFilter: ['class']
-                });
-                
-                // Also handle the ESC key for exiting full screen
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        // Small delay to ensure the class is removed
-                        setTimeout(function() {
-                            const isAdminCard = contentTextarea.closest('.admin-card');
-                            if (isAdminCard) {
-                                const isFullScreen = toolbar.fullscreen.classList.contains('active');
-                                if (!isFullScreen) {
-                                    isAdminCard.classList.remove('editor-fullscreen');
-                                    document.body.classList.remove('editor-in-fullscreen');
+                    }, 500);
+                }
+            }
+            
+            // Explicit preview update function that doesn't check state variables
+            function updatePreviewExplicit(isVisible) {
+                if (isVisible) {
+                    // Clear any existing preview timeout
+                    if (previewTimeout) {
+                        clearTimeout(previewTimeout);
+                    }
+                    
+                    // Debounce preview updates (500ms)
+                    previewTimeout = setTimeout(() => {
+                        const content = contentTextarea.value;
+                        const contentHash = hashContent(content);
+                        
+                        // Only update if content has actually changed
+                        if (contentHash !== lastRenderedContentHash) {
+                            // Show loading indicator
+                            editorPreview.innerHTML = '<div class="preview-placeholder">Rendering...</div>';
+                            
+                            // Send content to backend for rendering
+                            const formData = new FormData();
+                            formData.append('content', content);
+                            
+                            fetch('/admin/render-markdown', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
                                 }
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    editorPreview.innerHTML = data.html;
+                                    lastRenderedContentHash = contentHash;
+                                    // Ensure scroll works after content update
+                                    setTimeout(() => {
+                                        editorPreview.scrollTop = 0;
+                                    }, 10);
+                                } else {
+                                    editorPreview.innerHTML = '<div class="preview-error">Error rendering preview: ' + data.error + '</div>';
+                                }
+                            })
+                            .catch(error => {
+                                editorPreview.innerHTML = '<div class="preview-error">Error rendering preview: ' + error.message + '</div>';
+                            });
+                        }
+                    }, 500);
+                }
+            }
+            
+            // Toggle preview mode
+            function togglePreview() {
+                if (isPreviewVisible) {
+                    // Switch to editor only
+                    contentTextarea.parentElement.style.display = 'flex';
+                    previewPane.style.display = 'none';
+                    previewToggle.innerHTML = '<i class="bi bi-eye"></i>';
+                    previewToggle.title = 'Toggle Preview';
+                    isPreviewVisible = false;
+                } else {
+                    // Switch to preview only
+                    contentTextarea.parentElement.style.display = 'none';
+                    previewPane.style.display = 'flex';
+                    // Ensure proper height
+                    previewPane.style.flex = '1';
+                    previewPane.style.height = '100%';
+                    // Update preview - always render when switching to preview
+                    updatePreviewExplicit(true);
+                    previewToggle.innerHTML = '<i class="bi bi-pencil"></i>';
+                    previewToggle.title = 'Toggle Editor';
+                    isPreviewVisible = true;
+                }
+            }
+            
+            // Toggle split view
+            function toggleSplitView() {
+                if (isSplitView) {
+                    // Switch to single pane
+                    contentTextarea.parentElement.style.display = 'flex';
+                    previewPane.style.display = 'none';
+                    splitView.innerHTML = '<i class="bi bi-layout-split"></i>';
+                    splitView.title = 'Split View';
+                    isSplitView = false;
+                } else {
+                    // Switch to split view
+                    contentTextarea.parentElement.style.display = 'flex';
+                    previewPane.style.display = 'flex';
+                    // Ensure proper height
+                    contentTextarea.parentElement.style.flex = '1';
+                    previewPane.style.flex = '1';
+                    // Update preview - always render when switching to split view
+                    updatePreviewExplicit(true);
+                    splitView.innerHTML = '<i class="bi bi-layout-wtf"></i>';
+                    splitView.title = 'Single Pane';
+                    isSplitView = true;
+                }
+            }
+            
+            // Auto-save function
+            function autoSave() {
+                // Clear any existing timeout
+                if (autoSaveTimeout) {
+                    clearTimeout(autoSaveTimeout);
+                }
+                
+                // Update title and word count before saving
+                updateTitle();
+                updateWordCount();
+                
+                // Set a new timeout (debounce for 1 second)
+                autoSaveTimeout = setTimeout(() => {
+                    // Get current values
+                    const currentTitle = titleInput ? titleInput.value : '';
+                    const currentContent = contentTextarea ? contentTextarea.value : '';
+                    
+                    // Check if content has actually changed
+                    if (currentTitle !== lastSavedContent.title || currentContent !== lastSavedContent.content) {
+                        showAutoSaveNotification('Saving...');
+                        
+                        // Create form data for auto-save
+                        const formData = new FormData();
+                        formData.append('title', currentTitle);
+                        formData.append('content', currentContent);
+                        formData.append('autosave', 'true');
+                        
+                        // Send AJAX request for auto-save
+                        fetch(window.location.href, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
                             }
-                        }, 50);
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showAutoSaveNotification('All changes saved');
+                                lastSavedContent = {
+                                    title: currentTitle,
+                                    content: currentContent
+                                };
+                                lastSaved.textContent = 'Saved just now';
+                                
+                                // Update preview after successful save
+                                updatePreview();
+                            } else {
+                                showAutoSaveNotification('Auto-save failed: ' + (data.error || 'Unknown error'), true);
+                            }
+                        })
+                        .catch(error => {
+                            showAutoSaveNotification('Auto-save failed: ' + error.message, true);
+                        });
+                    } else {
+                        // Content hasn't changed, but we still want to update the preview
+                        // Only update if the content is different from what's currently displayed
+                        const currentPreviewContent = editorPreview.textContent || '';
+                        if (currentContent !== currentPreviewContent) {
+                            updatePreview();
+                        }
+                    }
+                }, 1000);
+            }
+            
+            // Toolbar button functionality
+            document.querySelectorAll('[data-command]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const command = this.getAttribute('data-command');
+                    const start = contentTextarea.selectionStart;
+                    const end = contentTextarea.selectionEnd;
+                    const selectedText = contentTextarea.value.substring(start, end);
+                    let newText = '';
+                    let newCursorPos = start;
+                    
+                    switch (command) {
+                        case 'bold':
+                            newText = `**${selectedText}**`;
+                            newCursorPos = start + 2;
+                            break;
+                        case 'italic':
+                            newText = `*${selectedText}*`;
+                            newCursorPos = start + 1;
+                            break;
+                        case 'heading':
+                            newText = `# ${selectedText}`;
+                            newCursorPos = start + 2;
+                            break;
+                        case 'link':
+                            newText = `[${selectedText}](url)`;
+                            newCursorPos = start + selectedText.length + 3;
+                            break;
+                        case 'image':
+                            newText = `![alt text](image-url)`;
+                            newCursorPos = start + 12;
+                            break;
+                    }
+                    
+                    // Insert the formatted text
+                    const textBefore = contentTextarea.value.substring(0, start);
+                    const textAfter = contentTextarea.value.substring(end);
+                    contentTextarea.value = textBefore + newText + textAfter;
+                    
+                    // Set cursor position
+                    contentTextarea.setSelectionRange(newCursorPos, newCursorPos);
+                    contentTextarea.focus();
+                    
+                    // Trigger auto-save
+                    autoSave();
+                });
+            });
+            
+            // Event listeners
+            if (contentTextarea) {
+                contentTextarea.addEventListener('input', function() {
+                    autoSave();
+                    // Update preview in real-time when in split view
+                    if (isSplitView) {
+                        updatePreview();
                     }
                 });
-                
-                // Clean up observer when page is unloaded
-                window.addEventListener('beforeunload', function() {
-                    observer.disconnect();
-                    // Clean up classes if they exist
-                    document.body.classList.remove('editor-in-fullscreen');
-                    const adminCard = contentTextarea.closest('.admin-card');
-                    if (adminCard) {
-                        adminCard.classList.remove('editor-fullscreen');
+                updateTitle();
+                updateWordCount();
+            }
+            
+            // Ensure scrolling works in the preview pane
+            if (editorPreview) {
+                // Prevent default scrolling behavior and handle it manually
+                editorPreview.addEventListener('wheel', function(e) {
+                    // Allow natural scrolling
+                    e.preventDefault();
+                    editorPreview.scrollTop += e.deltaY;
+                }, { passive: false });
+            }
+            
+            if (previewToggle) {
+                previewToggle.addEventListener('click', togglePreview);
+            }
+            
+            if (splitView) {
+                splitView.addEventListener('click', toggleSplitView);
+            }
+            
+            // Keyboard shortcuts
+            if (contentTextarea) {
+                contentTextarea.addEventListener('keydown', function(e) {
+                    // Ctrl+B or Cmd+B for bold
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                        e.preventDefault();
+                        document.querySelector('[data-command="bold"]').click();
+                    }
+                    // Ctrl+I or Cmd+I for italic
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+                        e.preventDefault();
+                        document.querySelector('[data-command="italic"]').click();
+                    }
+                    // Ctrl+H or Cmd+H for heading
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                        e.preventDefault();
+                        document.querySelector('[data-command="heading"]').click();
                     }
                 });
             }
             
-            // Update textarea value when form is submitted
-            const form = contentTextarea.closest('form');
-            if (form) {
-                form.addEventListener('submit', function() {
-                    // Only update if EasyMDE was successfully initialized
-                    if (easyMDE) {
-                        contentTextarea.value = easyMDE.value();
-                    }
-                });
-            }
-        }
-</script>
-{% endblock %}
+            // Clean up on page unload
+            window.addEventListener('beforeunload', function() {
+                if (autoSaveTimeout) {
+                    clearTimeout(autoSaveTimeout);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, abort, redirect, url_for, flash
+from flask import Blueprint, render_template, request, abort, redirect, url_for, flash, jsonify
 from ..services.course_service import CourseService
 from ..services.file_service import FileStorageService
 from ..services.auth_service import AuthService
 from ..utils.helpers import sanitize_path
 from .. import cache
+import markdown
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -184,24 +185,50 @@ def admin_document_new(course_id):
         abort(404)
     
     if request.method == 'POST':
-        title = request.form['title'].strip()
+        # Check if this is an auto-save request
+        is_autosave = request.form.get('autosave') == 'true'
+        title = request.form['title'].strip()  # Title extracted from content
         content = request.form['content'].strip()
         
-        if not title:
-            flash('Document title is required', 'error')
+        # Validate input
+        if not title or title == 'Untitled Document':
+            error_msg = 'Document title is required'
+            if is_autosave:
+                return jsonify({'success': False, 'error': error_msg}), 400
+            else:
+                flash(error_msg, 'error')
         else:
             # Create filename from title
             filename = title.lower().replace(' ', '-').replace('_', '-') + '.md'
             
-            # Save document
-            if CourseService.save_document(course_id, filename, content):
-                # Clear cache after creating a new document
-                cache.clear()
-                flash(f'Document "{title}" created successfully', 'success')
-                return redirect(url_for('admin.admin_course_view', course_id=course_id))
+            # Validate filename
+            if not sanitize_path(filename):
+                error_msg = 'Invalid document title'
+                if is_autosave:
+                    return jsonify({'success': False, 'error': error_msg}), 400
+                else:
+                    flash(error_msg, 'error')
             else:
-                flash('Error creating document', 'error')
+                # Save document
+                if CourseService.save_document(course_id, filename, content):
+                    # Clear cache after creating a new document
+                    cache.clear()
+                    if is_autosave:
+                        return jsonify({'success': True}), 200
+                    else:
+                        flash(f'Document "{title}" created successfully', 'success')
+                        return redirect(url_for('admin.admin_course_view', course_id=course_id))
+                else:
+                    error_msg = 'Error creating document'
+                    if is_autosave:
+                        return jsonify({'success': False, 'error': error_msg}), 500
+                    else:
+                        flash(error_msg, 'error')
     
+    # For AJAX requests, return JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True}), 200
+        
     return render_template('admin/document_form.html', course_id=course_id, document=None)
 
 @admin_bp.route('/course/<course_id>/document/<filename>/edit', methods=['GET', 'POST'])
@@ -241,21 +268,39 @@ def admin_document_edit(course_id, filename):
     }
     
     if request.method == 'POST':
-        new_title = request.form['title'].strip()
+        # Check if this is an auto-save request
+        is_autosave = request.form.get('autosave') == 'true'
+        new_title = request.form['title'].strip()  # Title extracted from content
         new_content = request.form['content'].strip()
         
-        if not new_title:
-            flash('Document title is required', 'error')
+        # Validate input
+        if not new_title or new_title == 'Untitled Document':
+            error_msg = 'Document title is required'
+            if is_autosave:
+                return jsonify({'success': False, 'error': error_msg}), 400
+            else:
+                flash(error_msg, 'error')
         else:
             # Update document
             if CourseService.save_document(course_id, filename, new_content):
                 # Clear cache after updating a document
                 cache.clear()
-                flash(f'Document "{new_title}" updated successfully', 'success')
-                return redirect(url_for('admin.admin_course_view', course_id=course_id))
+                if is_autosave:
+                    return jsonify({'success': True}), 200
+                else:
+                    flash(f'Document "{new_title}" updated successfully', 'success')
+                    return redirect(url_for('admin.admin_course_view', course_id=course_id))
             else:
-                flash('Error updating document', 'error')
+                error_msg = 'Error updating document'
+                if is_autosave:
+                    return jsonify({'success': False, 'error': error_msg}), 500
+                else:
+                    flash(error_msg, 'error')
     
+    # For AJAX requests, return JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True}), 200
+        
     return render_template('admin/document_form.html', course_id=course_id, document=document)
 
 @admin_bp.route('/course/<course_id>/document/<filename>/delete', methods=['POST'])
@@ -370,3 +415,38 @@ def public_file(filename):
             abort(403)  # Forbidden
     
     return send_from_directory(str(Config.FILE_STORAGE_FOLDER), filename)
+
+@admin_bp.route('/render-markdown', methods=['POST'])
+def render_markdown():
+    """Render markdown content to HTML"""
+    if not AuthService.is_logged_in():
+        return jsonify({'success': False, 'error': 'Authentication required'}), 401
+    
+    try:
+        markdown_content = request.form.get('content', '')
+        
+        # Configure markdown with extensions
+        md = markdown.Markdown(extensions=[
+            'tables',
+            'fenced_code',
+            'codehilite',
+            'toc',
+            'nl2br',
+            'sane_lists'
+        ])
+        
+        # Convert markdown to HTML
+        html_content = md.convert(markdown_content)
+        
+        # Wrap the content in a div with our preview class for consistent styling
+        wrapped_content = f'<div class="markdown-preview-content">{html_content}</div>'
+        
+        return jsonify({
+            'success': True,
+            'html': wrapped_content
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
